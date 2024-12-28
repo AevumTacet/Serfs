@@ -1,12 +1,12 @@
-package serfs.Behaviors;
+package serfs.Jobs;
 
 import org.bukkit.Location;
 import org.bukkit.entity.AbstractVillager;
 
 import serfs.SerfData;
 
-public class HarvestBehavior extends Behavior {
-	public HarvestBehavior(AbstractVillager entity, SerfData data, Location startLocation) {
+public class HarvesterJob extends Job {
+	public HarvesterJob(AbstractVillager entity, SerfData data, Location startLocation) {
 		super(entity, data, startLocation);
 	}
 

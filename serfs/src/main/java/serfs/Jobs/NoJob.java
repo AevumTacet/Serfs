@@ -1,4 +1,4 @@
-package serfs.Behaviors;
+package serfs.Jobs;
 
 import org.bukkit.Location;
 import org.bukkit.entity.AbstractVillager;
@@ -7,10 +7,10 @@ import org.bukkit.entity.Villager;
 
 import serfs.SerfData;
 
-public class FollowBehavior extends Behavior {
+public class NoJob extends Job {
 	private Villager.Profession profession;
 
-	public FollowBehavior(AbstractVillager entity, SerfData data, Location startLocation) {
+	public NoJob(AbstractVillager entity, SerfData data, Location startLocation) {
 		super(entity, data, startLocation);
 	}
 

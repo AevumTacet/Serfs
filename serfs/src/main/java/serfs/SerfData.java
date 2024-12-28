@@ -7,13 +7,13 @@ import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import serfs.Behaviors.Behavior;
+import serfs.Jobs.Job;
 
 public class SerfData {
 	private UUID entityID;
 	private UUID ownerID;
 	private boolean selected;
-	private Behavior behavior;
+	private Job behavior;
 
 	public SerfData(LivingEntity entity, Player owner) {
 		this.entityID = entity.getUniqueId();
@@ -39,11 +39,11 @@ public class SerfData {
 		return ownerID;
 	}
 
-	public Behavior getBehavior() {
+	public Job getBehavior() {
 		return behavior;
 	}
 
-	public void setBehavior(Behavior newBehavior) {
+	public void setBehavior(Job newBehavior) {
 		this.behavior.onBehaviorEnd();
 
 		newBehavior.onBehaviorStart();

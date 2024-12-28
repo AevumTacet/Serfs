@@ -21,7 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.destroystokyo.paper.entity.ai.GoalKey;
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 
-import serfs.Behaviors.FollowBehavior;
+import serfs.Jobs.NoJob;
 
 public class SerfManager {
 	private Logger logger;
@@ -71,7 +71,7 @@ public class SerfManager {
 		// entity.setProfession(Villager.Profession.FARMER);
 
 		SerfData serf = new SerfData(entity, owner);
-		serf.setBehavior(new FollowBehavior(entity, serf, entity.getLocation()));
+		serf.setBehavior(new NoJob(entity, serf, entity.getLocation()));
 		data.addSerf(serf);
 		trackedSerfs.add(entity.getUniqueId());
 
