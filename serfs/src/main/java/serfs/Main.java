@@ -11,8 +11,9 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         super.onEnable();
-
         manager = new SerfManager(this.getLogger());
+        EventsHandler handler = new EventsHandler(this.getLogger());
+        getServer().getPluginManager().registerEvents(handler, this);
     }
 
     @Override

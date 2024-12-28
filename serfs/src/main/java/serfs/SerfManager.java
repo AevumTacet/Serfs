@@ -6,9 +6,19 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.AbstractVillager;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import com.destroystokyo.paper.entity.ai.GoalKey;
+import com.destroystokyo.paper.entity.ai.VanillaGoal;
+
+import serfs.Behaviors.FollowBehavior;
 
 public class SerfManager {
 	private Logger logger;
@@ -18,6 +28,10 @@ public class SerfManager {
 	public SerfManager(Logger logger) {
 		this.logger = logger;
 		Update();
+	}
+
+	public boolean isServant(Entity entity) {
+		return trackedSerfs.contains(entity.getUniqueId());
 	}
 
 	public Stream<SerfData> getServants(Player player) {
@@ -32,13 +46,28 @@ public class SerfManager {
 		return playerData.values().stream().flatMap(PlayerData::getServants);
 	}
 
-	public void registerEntity(LivingEntity entity, Player owner) {
-		SerfData serf = new SerfData(entity, owner);
+	public SerfData getServant(UUID entityID) {
+		return getServants().filter(x -> x.getEntityID().equals(entityID))
+				.findFirst()
+				.orElse(null);
+	}
+
+	public void registerEntity(Villager entity, Player owner) {
 		PlayerData data = playerData.get(owner.getUniqueId());
 		if (data == null) {
 			data = new PlayerData(owner.getUniqueId());
 			playerData.put(owner.getUniqueId(), data);
 		}
+
+		// Supress default villager behaviors
+		Bukkit.getMobGoals().removeGoal(entity, VanillaGoal.MOVE_BACK_TO_VILLAGE);
+		Bukkit.getMobGoals().removeGoal(entity, VanillaGoal.TRADE_WITH_PLAYER);
+		entity.setMemory(MemoryKey.HOME, null);
+		// entity.setMemory(MemoryKey.JOB_SITE, null);
+		// entity.setProfession(Villager.Profession.FARMER);
+
+		SerfData serf = new SerfData(entity, owner);
+		serf.setBehavior(new FollowBehavior(entity, serf));
 		data.addSerf(serf);
 		trackedSerfs.add(entity.getUniqueId());
 	}
@@ -54,12 +83,12 @@ public class SerfManager {
 			@Override
 			public void run() {
 				getServants()
-						.filter(serf -> serf.getEntity() != null)
+						.filter(serf -> serf != null && serf.getEntity() != null)
 						.forEach(serf -> {
 							serf.getBehavior().onBehaviorTick();
 							serf.getBehavior().tickCount++;
 						});
 			}
-		}.runTaskTimer(Main.plugin, 0, 5);
+		}.runTaskTimer(Main.plugin, 0, 2);
 	};
 }

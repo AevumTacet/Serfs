@@ -1,0 +1,6 @@
+name: Serfs
+version: 1.0.0
+description: Hire villagers to be your servants.
+author: Telwa
+main: serfs.Main
+api-version: 1.21.1
