@@ -1,14 +1,14 @@
 package serfs.Jobs;
 
 import org.bukkit.Location;
-import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 
 import serfs.SerfData;
 
 public class NoJob extends Job {
 
-	public NoJob(AbstractVillager entity, SerfData data, Location startLocation) {
+	public NoJob(Villager entity, SerfData data, Location startLocation) {
 		super(entity, data, startLocation);
 	}
 

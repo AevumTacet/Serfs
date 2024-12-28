@@ -10,7 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.AbstractVillager;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
@@ -18,7 +18,7 @@ import serfs.Utils;
 import serfs.Jobs.Job;
 
 public class PlanterJob extends Job {
-	public PlanterJob(AbstractVillager entity, SerfData data, Location startLocation) {
+	public PlanterJob(Villager entity, SerfData data, Location startLocation) {
 		super(entity, data, startLocation);
 	}
 
@@ -42,7 +42,7 @@ public class PlanterJob extends Job {
 		}
 
 		if (target == null) {
-			var nearbyBlocks = Utils.getNearbyBlocks(startLocation, 15, material -> material == Material.FARMLAND);
+			var nearbyBlocks = Utils.getNearbyBlocks(startLocation, 15, 5, 15, material -> material == Material.FARMLAND);
 			target = nearbyBlocks.stream()
 					.filter(block -> block.getRelative(BlockFace.UP).getType() == Material.AIR)
 					.min(Comparator.comparingDouble(block -> block.getLocation().distance(entity.getLocation())))
@@ -58,7 +58,7 @@ public class PlanterJob extends Job {
 			if (distance < 1.5) {
 				entity.swingMainHand();
 
-				Block relative = target.getRelative(BlockFace.UP);
+				Block relative = target.getLocation().add(0, 1.5, 0).getBlock();
 				if (relative.getType() == Material.AIR) {
 
 					if (!seeds.isEmpty()) {
@@ -67,7 +67,8 @@ public class PlanterJob extends Job {
 
 						ItemStack seed = seeds.get(index);
 						if (seed != null && seed.getType() != null) {
-							relative.setType(Utils.seedMap.getOrDefault(seed.getType(), Material.AIR));
+							System.out.println("Attempting to plant " + seed.getType());
+							relative.setType(Utils.seedToBlockMap.getOrDefault(seed.getType(), Material.AIR));
 
 							inventory.remove(seed);
 							int amount = seed.getAmount() - 1;
@@ -95,6 +96,11 @@ public class PlanterJob extends Job {
 	protected void nextJob() {
 		Job nextJob = new CollectorJob(entity, data, startLocation);
 		data.setBehavior(nextJob);
+	}
+
+	@Override
+	public void onBehaviorEnd() {
+		entity.getEquipment().setItemInMainHand(null);
 	}
 
 }

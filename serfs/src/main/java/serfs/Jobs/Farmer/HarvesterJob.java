@@ -6,7 +6,8 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
-import org.bukkit.entity.AbstractVillager;
+import org.bukkit.entity.Villager;
+
 import serfs.SerfData;
 import serfs.Utils;
 import serfs.Jobs.Job;
@@ -14,14 +15,13 @@ import serfs.Jobs.Job;
 public class HarvesterJob extends Job {
 	private List<Block> nearbyBlocks;
 
-	public HarvesterJob(AbstractVillager entity, SerfData data, Location startLocation) {
+	public HarvesterJob(Villager entity, SerfData data, Location startLocation) {
 		super(entity, data, startLocation);
 	}
 
 	@Override
 	public void onBehaviorStart() {
-		inventory.clear();
-		nearbyBlocks = Utils.getNearbyBlocks(startLocation, 15, material -> Utils.isHarvestable(material));
+		nearbyBlocks = Utils.getNearbyBlocks(startLocation, 15, 5, 15, material -> Utils.isHarvestable(material));
 	}
 
 	@Override
