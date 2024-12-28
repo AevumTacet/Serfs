@@ -28,6 +28,10 @@ public class HarvesterJob extends Job {
 
 	@Override
 	public void onBehaviorTick() {
+		if (!Utils.isDay()) {
+			// Villager should not be working at night
+			return;
+		}
 
 		if (target == null) {
 			target = nearbyBlocks.stream()
@@ -71,6 +75,7 @@ public class HarvesterJob extends Job {
 		Job nextJob;
 		if (seedNumber == 0) {
 			nextJob = new CollectorJob(entity, data, startLocation);
+			((CollectorJob) nextJob).canCollect = true;
 		} else {
 			nextJob = new PlanterJob(entity, data, startLocation);
 		}

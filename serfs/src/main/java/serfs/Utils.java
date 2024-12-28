@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -59,6 +60,11 @@ public class Utils {
 
 	public static boolean isSeed(Material material) {
 		return seedToBlockMap.containsKey(material);
+	}
+
+	public static boolean isDay() {
+		long time = Bukkit.getWorld("world").getTime();
+		return time >= 0 && time < 12300;
 	}
 
 }

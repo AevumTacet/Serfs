@@ -30,6 +30,11 @@ public class PlanterJob extends Job {
 
 	@Override
 	public void onBehaviorTick() {
+		if (!Utils.isDay()) {
+			// Villager should not be working at night
+			return;
+		}
+
 		List<ItemStack> seeds = Stream.of(inventory.getContents())
 				.filter(item -> item != null)
 				.filter(item -> Utils.isSeed(item.getType()))
@@ -94,7 +99,9 @@ public class PlanterJob extends Job {
 
 	@Override
 	protected void nextJob() {
+		boolean canStore = inventory.getSize() > 0;
 		Job nextJob = new CollectorJob(entity, data, startLocation);
+		((CollectorJob) nextJob).canStore = canStore;
 		data.setBehavior(nextJob);
 	}
 

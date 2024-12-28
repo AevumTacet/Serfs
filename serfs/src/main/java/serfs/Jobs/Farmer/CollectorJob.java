@@ -2,9 +2,9 @@ package serfs.Jobs.Farmer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -18,8 +18,12 @@ import serfs.Utils;
 import serfs.Jobs.Job;
 
 public class CollectorJob extends Job {
+	public boolean canStore;
+	public boolean canCollect;
+
 	private int currentTick;
 	private boolean canInteract;
+	private Random random = new Random();
 
 	public CollectorJob(Villager entity, SerfData data, Location startLocation) {
 		super(entity, data, startLocation);
@@ -33,6 +37,11 @@ public class CollectorJob extends Job {
 
 	@Override
 	public void onBehaviorTick() {
+		if (!Utils.isDay()) {
+			// Villager should not be working at night
+			return;
+		}
+
 		currentTick++;
 
 		Block block = startLocation.getBlock();
@@ -51,37 +60,36 @@ public class CollectorJob extends Job {
 		}
 
 		if (!canInteract) {
+			entity.getEquipment().setItemInMainHand(null);
 			if (chest.isOpen()) {
 				chest.close();
 			}
 			return;
 		}
 
+		entity.lookAt(startLocation);
 		List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
-		long cropNumber = inventoryList.stream().filter(x -> x != null && Utils.isCrop(x.getType())).count();
-		long seedNumber = inventoryList.stream().filter(x -> x != null && Utils.isSeed(x.getType())).count();
 
 		if (distance < 1.5) {
-			entity.lookAt(startLocation);
 			entity.getPathfinder().stopPathfinding();
 
 			if (currentTick % 10 != 0) {
 				return;
 			}
 
-			if (cropNumber > 0 && canInteract) {
-				if (!chest.isOpen()) {
-					chest.open();
-					return;
-				}
+			if (!chest.isOpen() && (canCollect || canStore) && canInteract) {
+				chest.open();
+				return;
+			}
 
+			if (canStore && canInteract) {
 				ItemStack item = inventoryList.stream()
 						.filter(x -> x != null)
 						.findAny().orElse(null);
 
 				if (item != null) {
 					entity.swingMainHand();
-					entity.shakeHead();
+					// entity.shakeHead();
 					chest.getInventory().addItem(item);
 					inventory.remove(item);
 
@@ -90,51 +98,57 @@ public class CollectorJob extends Job {
 					System.out.println("Storing " + item + " in chest");
 				} else {
 					canInteract = false;
-				}
-			} else if (seedNumber == 0 && canInteract) {
-				if (!chest.isOpen()) {
-					chest.open();
 					return;
 				}
-				ItemStack item = Stream.of(chest.getInventory().getContents())
-						.filter(x -> x != null && Utils.isSeed(x.getType()))
-						.findAny().orElse(null);
+			}
 
-				if (item != null) {
+			if (canCollect && canInteract) {
+
+				var chestSeeds = Stream.of(chest.getInventory().getContents())
+						.filter(x -> x != null && Utils.isSeed(x.getType()))
+						.collect(Collectors.toList());
+
+				ItemStack chestItem = chestSeeds.get(random.nextInt(chestSeeds.size()));
+
+				if (chestItem != null) {
 					entity.swingMainHand();
 					entity.shakeHead();
 
-					if (item.getAmount() > 4) {
-						item.setAmount(item.getAmount() / 4);
-					}
+					int count = chestItem.getAmount() > 8 ? chestItem.getAmount() / 8 : 1;
 
-					inventory.addItem(item);
-					chest.getInventory().remove(item);
+					inventory.addItem(new ItemStack(chestItem.getType(), count));
+					chestItem.setAmount(chestItem.getAmount() - count);
+					// chest.getInventory().remove(chestItem);
 
-					entity.getEquipment().setItemInMainHand(new ItemStack(item.getType()));
+					entity.getEquipment().setItemInMainHand(new ItemStack(chestItem.getType()));
 					entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1);
+
+					System.out.println("Collecting " + chestItem.getType() + " x " + count + " from chest");
+					canInteract = false;
+					nextJob();
+					return;
 				}
-
-				System.out.println("Collecting " + item + " from chest");
-
-				canInteract = false;
-				nextJob();
-
-			} else {
-				canInteract = false;
-				entity.getEquipment().setItemInMainHand(null);
 			}
-			return; // In the next tick this function should be called again, but with a delay
+
+			// In the next tick this function should be called again, but with a delay
+			return;
 
 		} else {
-			entity.getPathfinder().moveTo(startLocation, 0.5);
+			if (canInteract) {
+				entity.getPathfinder().moveTo(startLocation, 0.5);
+			}
 		}
 
 	}
 
 	@Override
 	protected void nextJob() {
-		Job nextJob = new HarvesterJob(entity, data, startLocation);
+		Job nextJob;
+		if (canCollect) {
+			nextJob = new PlanterJob(entity, data, startLocation);
+		} else {
+			nextJob = new HarvesterJob(entity, data, startLocation);
+		}
 		data.setBehavior(nextJob);
 	}
 
