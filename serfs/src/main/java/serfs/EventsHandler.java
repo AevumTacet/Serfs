@@ -2,6 +2,8 @@ package serfs;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.Material;
@@ -45,10 +47,15 @@ public class EventsHandler implements Listener {
 		}
 
 		Villager villager = (Villager) entity;
-		// Player player = event.getPlayer();
+		Player player = event.getPlayer();
+
 		if (manager.isServant(villager)) {
 			SerfData data = manager.getServant(villager.getUniqueId());
-			data.getBehavior().onBehaviorInteract();
+
+			if (player.equals(data.getOwner())) {
+				data.setSelected(!data.isSelected());
+				data.getBehavior().onBehaviorInteract();
+			}
 			event.setCancelled(true);
 			return;
 		}
@@ -81,8 +88,6 @@ public class EventsHandler implements Listener {
 			List<MerchantRecipe> trades = new ArrayList<>(villager.getRecipes());
 			trades.add(customTrade);
 			villager.setRecipes(trades);
-
-			logger.info("Added custom trade to villager: " + villager.getUniqueId());
 		}
 	}
 
@@ -96,7 +101,9 @@ public class EventsHandler implements Listener {
 
 		Villager villager = (Villager) event.getInventory().getHolder();
 
-		if (villager.getProfession() == Villager.Profession.FARMER) {
+		if (villager.getProfession() == Villager.Profession.FARMER
+				&& event.getAction() == InventoryAction.PICKUP_ALL) {
+
 			ItemStack item = event.getCurrentItem();
 			if (item == null) {
 				return;
@@ -116,9 +123,23 @@ public class EventsHandler implements Listener {
 				Player playerEntity = (Player) player;
 				Main.manager.registerEntity(villager, playerEntity);
 				player.sendMessage("Hired farmer!");
+
 				event.getInventory().close();
 				event.setCancelled(true);
 			}
+		}
+	}
+
+	@EventHandler
+	public void onEntityDeath(EntityDeathEvent event) {
+		Entity entity = event.getEntity();
+		if (manager.isServant(entity)) {
+			SerfData serf = manager.getServant(entity.getUniqueId());
+			if (serf.getOwner() != null) {
+				serf.getOwner().sendMessage("Your serf has died!");
+			}
+
+			manager.unregisterEntity(entity.getUniqueId());
 		}
 	}
 }

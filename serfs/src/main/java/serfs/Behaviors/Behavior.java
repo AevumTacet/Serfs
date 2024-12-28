@@ -1,7 +1,7 @@
 package serfs.Behaviors;
 
+import org.bukkit.Location;
 import org.bukkit.entity.AbstractVillager;
-import org.bukkit.entity.LivingEntity;
 
 import serfs.SerfData;
 
@@ -9,11 +9,13 @@ public abstract class Behavior {
 	public int tickCount;
 	public AbstractVillager entity;
 	public SerfData data;
+	public Location startLocation;
 
-	public Behavior(AbstractVillager entity, SerfData data) {
+	public Behavior(AbstractVillager entity, SerfData data, Location startLocation) {
 		this.entity = entity;
 		this.data = data;
-		tickCount = 0;
+		this.tickCount = 0;
+		this.startLocation = startLocation;
 	}
 
 	public abstract void onBehaviorStart();

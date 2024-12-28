@@ -7,6 +7,9 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -31,7 +34,7 @@ public class SerfManager {
 	}
 
 	public boolean isServant(Entity entity) {
-		return trackedSerfs.contains(entity.getUniqueId());
+		return entity instanceof Villager && trackedSerfs.contains(entity.getUniqueId());
 	}
 
 	public Stream<SerfData> getServants(Player player) {
@@ -53,6 +56,7 @@ public class SerfManager {
 	}
 
 	public void registerEntity(Villager entity, Player owner) {
+		World world = entity.getWorld();
 		PlayerData data = playerData.get(owner.getUniqueId());
 		if (data == null) {
 			data = new PlayerData(owner.getUniqueId());
@@ -67,9 +71,12 @@ public class SerfManager {
 		// entity.setProfession(Villager.Profession.FARMER);
 
 		SerfData serf = new SerfData(entity, owner);
-		serf.setBehavior(new FollowBehavior(entity, serf));
+		serf.setBehavior(new FollowBehavior(entity, serf, entity.getLocation()));
 		data.addSerf(serf);
 		trackedSerfs.add(entity.getUniqueId());
+
+		world.playSound(entity.getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 1, 1);
+		world.spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation(), 10);
 	}
 
 	public void unregisterEntity(UUID entityID) {
@@ -85,8 +92,15 @@ public class SerfManager {
 				getServants()
 						.filter(serf -> serf != null && serf.getEntity() != null)
 						.forEach(serf -> {
+							Entity entity = serf.getEntity();
+
 							serf.getBehavior().onBehaviorTick();
 							serf.getBehavior().tickCount++;
+
+							if (serf.isSelected()) {
+								entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation(), 10);
+							}
+							entity.setGlowing(serf.isSelected());
 						});
 			}
 		}.runTaskTimer(Main.plugin, 0, 2);

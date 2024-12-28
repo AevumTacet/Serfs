@@ -1,17 +1,22 @@
 package serfs.Behaviors;
 
+import org.bukkit.Location;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 
 import serfs.SerfData;
 
 public class FollowBehavior extends Behavior {
-	public FollowBehavior(AbstractVillager entity, SerfData data) {
-		super(entity, data);
+	private Villager.Profession profession;
+
+	public FollowBehavior(AbstractVillager entity, SerfData data, Location startLocation) {
+		super(entity, data, startLocation);
 	}
 
 	@Override
 	public void onBehaviorStart() {
+		profession = ((Villager) entity).getProfession();
 	}
 
 	@Override
@@ -20,12 +25,14 @@ public class FollowBehavior extends Behavior {
 		if (owner == null) {
 			return;
 		}
+		entity.setTarget(owner);
 
 		double distance = entity.getLocation().distance(owner.getLocation());
 		if (distance > 30) {
 			entity.teleport(owner.getLocation());
 		} else if (distance > 5) {
-			entity.getPathfinder().moveTo(owner.getLocation(), 0.5);
+			double speed = distance < 15 ? 0.5 : 1;
+			entity.getPathfinder().moveTo(owner.getLocation(), speed);
 		} else {
 			entity.getPathfinder().stopPathfinding();
 		}
@@ -33,7 +40,6 @@ public class FollowBehavior extends Behavior {
 
 	@Override
 	public void onBehaviorInteract() {
-		System.out.println("Clicked");
 	}
 
 	@Override
