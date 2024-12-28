@@ -1,5 +1,6 @@
 package serfs.Jobs.Farmer;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
 import serfs.Utils;
@@ -63,7 +65,15 @@ public class HarvesterJob extends Job {
 
 	@Override
 	protected void nextJob() {
-		Job nextJob = new PlanterJob(entity, data, startLocation);
+		List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
+		long seedNumber = inventoryList.stream().filter(x -> x != null && Utils.isSeed(x.getType())).count();
+
+		Job nextJob;
+		if (seedNumber == 0) {
+			nextJob = new CollectorJob(entity, data, startLocation);
+		} else {
+			nextJob = new PlanterJob(entity, data, startLocation);
+		}
 		data.setBehavior(nextJob);
 	}
 

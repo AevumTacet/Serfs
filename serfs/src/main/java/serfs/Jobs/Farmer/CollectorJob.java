@@ -76,10 +76,9 @@ public class CollectorJob extends Job {
 				}
 
 				ItemStack item = inventoryList.stream()
-						.filter(x -> x != null && Utils.isCrop(x.getType()))
+						.filter(x -> x != null)
 						.findAny().orElse(null);
 
-				System.out.println("Storing " + item + " in chest");
 				if (item != null) {
 					entity.swingMainHand();
 					entity.shakeHead();
@@ -87,6 +86,10 @@ public class CollectorJob extends Job {
 					inventory.remove(item);
 
 					entity.getEquipment().setItemInMainHand(new ItemStack(item.getType()));
+					entity.getWorld().playSound(entity.getLocation(), Sound.ITEM_BOOK_PUT, 1, 1);
+					System.out.println("Storing " + item + " in chest");
+				} else {
+					canInteract = false;
 				}
 			} else if (seedNumber == 0 && canInteract) {
 				if (!chest.isOpen()) {
@@ -97,18 +100,26 @@ public class CollectorJob extends Job {
 						.filter(x -> x != null && Utils.isSeed(x.getType()))
 						.findAny().orElse(null);
 
-				System.out.println("Collecting " + item + " from chest");
 				if (item != null) {
 					entity.swingMainHand();
 					entity.shakeHead();
+
+					if (item.getAmount() > 4) {
+						item.setAmount(item.getAmount() / 4);
+					}
+
 					inventory.addItem(item);
 					chest.getInventory().remove(item);
 
 					entity.getEquipment().setItemInMainHand(new ItemStack(item.getType()));
 					entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1);
-				} else {
-					canInteract = false;
 				}
+
+				System.out.println("Collecting " + item + " from chest");
+
+				canInteract = false;
+				nextJob();
+
 			} else {
 				canInteract = false;
 				entity.getEquipment().setItemInMainHand(null);

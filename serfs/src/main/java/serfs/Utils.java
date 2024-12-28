@@ -60,4 +60,5 @@ public class Utils {
 	public static boolean isSeed(Material material) {
 		return seedToBlockMap.containsKey(material);
 	}
+
 }
