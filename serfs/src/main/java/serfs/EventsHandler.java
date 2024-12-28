@@ -2,18 +2,21 @@ package serfs;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -25,6 +28,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class EventsHandler implements Listener {
 	private Logger logger;
@@ -122,11 +127,32 @@ public class EventsHandler implements Listener {
 			if (flag.equals("hire_farmer")) {
 				Player playerEntity = (Player) player;
 				Main.manager.registerEntity(villager, playerEntity);
-				player.sendMessage("Hired farmer!");
 
 				event.getInventory().close();
-				event.setCancelled(true);
+				player.getInventory().remove(new ItemStack(Material.EMERALD, 64));
+
+				player.sendMessage("Hired farmer!");
 			}
+		}
+	}
+
+	@EventHandler
+	public void onPlayerClickBlock(PlayerInteractEvent event) {
+		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+			return;
+		}
+
+		Block block = event.getClickedBlock();
+		Player player = event.getPlayer();
+
+		var selected = manager.getServants(player).filter(serf -> serf.isSelected()).collect(Collectors.toList());
+		selected.forEach(serf -> {
+			serf.assignJob(block.getLocation());
+			serf.setSelected(false);
+		});
+
+		if (selected.size() > 0) {
+			event.setCancelled(true);
 		}
 	}
 
@@ -142,4 +168,5 @@ public class EventsHandler implements Listener {
 			manager.unregisterEntity(entity.getUniqueId());
 		}
 	}
+
 }

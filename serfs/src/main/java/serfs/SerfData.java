@@ -3,11 +3,18 @@ package serfs;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 
 import serfs.Jobs.Job;
+import serfs.Jobs.NoJob;
+import serfs.Jobs.Farmer.HarvesterJob;
 
 public class SerfData {
 	private UUID entityID;
@@ -44,14 +51,20 @@ public class SerfData {
 	}
 
 	public void setBehavior(Job newBehavior) {
-		this.behavior.onBehaviorEnd();
+		if (this.behavior != null) {
+			this.behavior.onBehaviorEnd();
+		}
 
 		newBehavior.onBehaviorStart();
 		this.behavior = newBehavior;
 	}
 
-	public LivingEntity getEntity() {
-		return (LivingEntity) Bukkit.getEntity(entityID);
+	public Entity getEntity() {
+		return Bukkit.getEntity(entityID);
+	}
+
+	public Villager getVillager() {
+		return (Villager) getEntity();
 	}
 
 	public Player getOwner() {
@@ -60,6 +73,24 @@ public class SerfData {
 
 	public boolean isValid() {
 		return getEntity() != null && getOwner() != null && getEntity().isValid();
+	}
+
+	public Villager.Profession getProfession() {
+		return ((Villager) getEntity()).getProfession();
+	}
+
+	public void assignJob(Location jobLocation) {
+		Block block = jobLocation.getBlock();
+		if (behavior != null && behavior instanceof NoJob) {
+			var profession = getProfession();
+
+			if (profession == Villager.Profession.FARMER && block.getType() == Material.CHEST) {
+				var farmerJob = new HarvesterJob(getVillager(), this, jobLocation);
+				setBehavior(farmerJob);
+			}
+		}
+
+		getEntity().getWorld().playSound(getEntity().getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
 	}
 
 	@Override

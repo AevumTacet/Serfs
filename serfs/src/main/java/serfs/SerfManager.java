@@ -95,7 +95,6 @@ public class SerfManager {
 							Entity entity = serf.getEntity();
 
 							serf.getBehavior().onBehaviorTick();
-							serf.getBehavior().tickCount++;
 
 							if (serf.isSelected()) {
 								entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation(), 10);
