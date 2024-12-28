@@ -3,12 +3,10 @@ package serfs.Jobs;
 import org.bukkit.Location;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 
 import serfs.SerfData;
 
 public class NoJob extends Job {
-	private Villager.Profession profession;
 
 	public NoJob(AbstractVillager entity, SerfData data, Location startLocation) {
 		super(entity, data, startLocation);
@@ -16,7 +14,6 @@ public class NoJob extends Job {
 
 	@Override
 	public void onBehaviorStart() {
-		profession = ((Villager) entity).getProfession();
 	}
 
 	@Override
@@ -39,11 +36,8 @@ public class NoJob extends Job {
 	}
 
 	@Override
-	public void onBehaviorInteract() {
-	}
+	protected void nextJob() {
 
-	@Override
-	public void onBehaviorEnd() {
 	}
 
 }
