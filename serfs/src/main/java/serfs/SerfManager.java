@@ -5,21 +5,15 @@ import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import com.destroystokyo.paper.entity.ai.GoalKey;
-import com.destroystokyo.paper.entity.ai.VanillaGoal;
 
 import serfs.Jobs.NoJob;
 
@@ -57,23 +51,26 @@ public class SerfManager {
 
 	public void registerEntity(Villager entity, Player owner) {
 		World world = entity.getWorld();
+		UUID entityID = entity.getUniqueId();
+
 		PlayerData data = playerData.get(owner.getUniqueId());
 		if (data == null) {
 			data = new PlayerData(owner.getUniqueId());
 			playerData.put(owner.getUniqueId(), data);
 		}
 
-		// Supress default villager behaviors
-		Bukkit.getMobGoals().removeGoal(entity, VanillaGoal.MOVE_BACK_TO_VILLAGE);
-		Bukkit.getMobGoals().removeGoal(entity, VanillaGoal.TRADE_WITH_PLAYER);
+		logger.info("Registering Serf with UUID: " + entityID);
+
+		Bukkit.getMobGoals().getAllGoals(entity).forEach(x -> System.out.println(x));
+		Bukkit.getMobGoals().removeAllGoals(entity);
 		entity.setMemory(MemoryKey.HOME, null);
-		// entity.setMemory(MemoryKey.JOB_SITE, null);
-		// entity.setProfession(Villager.Profession.FARMER);
+		entity.setPersistent(true);
+		entity.setRemoveWhenFarAway(false);
 
 		SerfData serf = new SerfData(entity, owner);
-		serf.setBehavior(new NoJob(entity, serf, entity.getLocation()));
+		serf.setBehavior(new NoJob(entityID, serf, entity.getLocation()));
 		data.addSerf(serf);
-		trackedSerfs.add(entity.getUniqueId());
+		trackedSerfs.add(entityID);
 
 		world.playSound(entity.getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 1, 1);
 		world.spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation(), 10);
@@ -90,7 +87,7 @@ public class SerfManager {
 			@Override
 			public void run() {
 				getServants()
-						.filter(serf -> serf != null && serf.getEntity() != null)
+						.filter(serf -> serf != null && serf.getEntity() != null && serf.getOwner() != null)
 						.forEach(serf -> {
 							Entity entity = serf.getEntity();
 

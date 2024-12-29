@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
@@ -19,13 +21,16 @@ import serfs.Utils;
 import serfs.Jobs.Job;
 
 public class PlanterJob extends Job {
-	public PlanterJob(Villager entity, SerfData data, Location startLocation) {
-		super(entity, data, startLocation);
+	public PlanterJob(UUID entityID, SerfData data, Location startLocation) {
+		super(entityID, data, startLocation);
 	}
 
 	@Override
 	public void onBehaviorStart() {
-		entity.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_HOE));
+		Villager villager = getEntity();
+		if (villager != null) {
+			villager.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_HOE));
+		}
 
 	}
 
@@ -36,13 +41,16 @@ public class PlanterJob extends Job {
 			return;
 		}
 
+		Villager villager = getEntity();
+		Inventory inventory = getInventory();
+
 		List<ItemStack> seeds = Stream.of(inventory.getContents())
 				.filter(item -> item != null)
 				.filter(item -> Utils.isSeed(item.getType()))
 				.collect(Collectors.toList());
 
 		if (seeds.size() == 0) {
-			System.out.println("Skipping planting since Villager has no seeds left");
+			System.err.println("Skipping planting since Villager has no seeds left");
 			nextJob();
 			return;
 		}
@@ -51,18 +59,18 @@ public class PlanterJob extends Job {
 			var nearbyBlocks = Utils.getNearbyBlocks(startLocation, 20, 5, 20, material -> material == Material.FARMLAND);
 			target = nearbyBlocks.stream()
 					.filter(block -> block.getRelative(BlockFace.UP).getType() == Material.AIR)
-					.min(Comparator.comparingDouble(block -> block.getLocation().distance(entity.getLocation())))
+					.min(Comparator.comparingDouble(block -> block.getLocation().distance(villager.getLocation())))
 					.orElse(null);
 
 			if (target == null) {
-				System.out.println("Skipping planting since no valid blocks were found");
+				System.err.println("Skipping planting since no valid blocks were found");
 				nextJob();
 				return;
 			}
 		} else {
-			double distance = entity.getLocation().distance(target.getLocation());
+			double distance = villager.getLocation().distance(target.getLocation());
 			if (distance < 1.5) {
-				entity.swingMainHand();
+				villager.swingMainHand();
 
 				Block relative = target.getLocation().add(0, 1.5, 0).getBlock();
 				if (relative.getType() == Material.AIR) {
@@ -89,7 +97,7 @@ public class PlanterJob extends Job {
 
 				target = null;
 			} else {
-				entity.getPathfinder().moveTo(target.getLocation(), 0.5);
+				villager.getPathfinder().moveTo(target.getLocation(), 0.5);
 			}
 		}
 
@@ -100,18 +108,27 @@ public class PlanterJob extends Job {
 
 	@Override
 	protected void nextJob() {
-		List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
-		long cropNumber = inventoryList.stream().filter(x -> x != null && Utils.isCrop(x.getType())).count();
+		Inventory inventory = getInventory();
+		long cropNumber;
+		if (inventory != null) {
+			List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
+			cropNumber = inventoryList.stream().filter(x -> x != null && Utils.isCrop(x.getType())).count();
+		} else {
+			cropNumber = 0;
+		}
 
 		boolean canStore = cropNumber > 0;
-		Job nextJob = new CollectorJob(entity, data, startLocation);
+		Job nextJob = new CollectorJob(entityID, data, startLocation);
 		((CollectorJob) nextJob).canStore = canStore;
 		data.setBehavior(nextJob);
 	}
 
 	@Override
 	public void onBehaviorEnd() {
-		entity.getEquipment().setItemInMainHand(null);
+		Villager villager = getEntity();
+		if (villager != null) {
+			villager.getEquipment().setItemInMainHand(null);
+		}
 	}
 
 }

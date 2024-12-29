@@ -86,7 +86,7 @@ public class SerfData {
 
 			if (profession == Villager.Profession.FARMER && block.getType() == Material.CHEST) {
 				getVillager().getInventory().clear();
-				var farmerJob = new HarvesterJob(getVillager(), this, jobLocation);
+				var farmerJob = new HarvesterJob(entityID, this, jobLocation);
 				setBehavior(farmerJob);
 			}
 		}

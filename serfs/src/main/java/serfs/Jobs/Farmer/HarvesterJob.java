@@ -3,11 +3,13 @@ package serfs.Jobs.Farmer;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
@@ -17,8 +19,8 @@ import serfs.Jobs.Job;
 public class HarvesterJob extends Job {
 	private List<Block> nearbyBlocks;
 
-	public HarvesterJob(Villager entity, SerfData data, Location startLocation) {
-		super(entity, data, startLocation);
+	public HarvesterJob(UUID entityID, SerfData data, Location startLocation) {
+		super(entityID, data, startLocation);
 	}
 
 	@Override
@@ -33,6 +35,8 @@ public class HarvesterJob extends Job {
 			return;
 		}
 
+		Villager villager = getEntity();
+
 		if (target == null) {
 			target = nearbyBlocks.stream()
 					.filter(block -> {
@@ -42,23 +46,23 @@ public class HarvesterJob extends Job {
 						}
 						return false;
 					})
-					.min(Comparator.comparingDouble(block -> block.getLocation().distance(entity.getLocation())))
+					.min(Comparator.comparingDouble(block -> block.getLocation().distance(villager.getLocation())))
 					.orElse(null);
 
 			if (target == null) {
-				System.out.println("Skipping Harvest since no valid blocks were found");
+				System.err.println("Skipping Harvest since no valid blocks were found");
 				nextJob();
 				return;
 			}
 		} else {
-			double distance = entity.getLocation().distance(target.getLocation());
+			double distance = villager.getLocation().distance(target.getLocation());
+
 			if (distance < 1.5) {
-				entity.swingMainHand();
+				villager.swingMainHand();
 				target.breakNaturally();
-				// inventory.addItem(target.getDrops().toArray(new ItemStack[0]));
 				target = null;
 			} else {
-				entity.getPathfinder().moveTo(target.getLocation(), 0.5);
+				villager.getPathfinder().moveTo(target.getLocation(), 0.5);
 			}
 		}
 
@@ -69,15 +73,21 @@ public class HarvesterJob extends Job {
 
 	@Override
 	protected void nextJob() {
-		List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
-		long seedNumber = inventoryList.stream().filter(x -> x != null && Utils.isSeed(x.getType())).count();
+		Inventory inventory = getInventory();
+		long seedNumber;
+		if (inventory != null) {
+			List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
+			seedNumber = inventoryList.stream().filter(x -> x != null && Utils.isSeed(x.getType())).count();
+		} else {
+			seedNumber = 0;
+		}
 
 		Job nextJob;
 		if (seedNumber == 0) {
-			nextJob = new CollectorJob(entity, data, startLocation);
+			nextJob = new CollectorJob(entityID, data, startLocation);
 			((CollectorJob) nextJob).canCollect = true;
 		} else {
-			nextJob = new PlanterJob(entity, data, startLocation);
+			nextJob = new PlanterJob(entityID, data, startLocation);
 		}
 		data.setBehavior(nextJob);
 	}

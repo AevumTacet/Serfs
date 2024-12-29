@@ -1,15 +1,16 @@
 package serfs.Jobs;
 
+import java.util.UUID;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
-
 import serfs.SerfData;
 
 public class NoJob extends Job {
 
-	public NoJob(Villager entity, SerfData data, Location startLocation) {
-		super(entity, data, startLocation);
+	public NoJob(UUID entityID, SerfData data, Location startLocation) {
+		super(entityID, data, startLocation);
 	}
 
 	@Override
@@ -22,16 +23,18 @@ public class NoJob extends Job {
 		if (owner == null) {
 			return;
 		}
-		entity.setTarget(owner);
+		Villager villager = getEntity();
 
-		double distance = entity.getLocation().distance(owner.getLocation());
+		villager.setTarget(owner);
+		double distance = villager.getLocation().distance(owner.getLocation());
+
 		if (distance > 30) {
-			entity.teleport(owner.getLocation());
+			villager.teleport(owner.getLocation());
 		} else if (distance > 5) {
 			double speed = distance < 15 ? 0.5 : 1;
-			entity.getPathfinder().moveTo(owner.getLocation(), speed);
+			villager.getPathfinder().moveTo(owner.getLocation(), speed);
 		} else {
-			entity.getPathfinder().stopPathfinding();
+			villager.getPathfinder().stopPathfinding();
 		}
 	}
 

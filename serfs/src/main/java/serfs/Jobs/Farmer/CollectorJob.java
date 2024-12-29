@@ -3,6 +3,7 @@ package serfs.Jobs.Farmer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
@@ -11,6 +12,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
@@ -25,8 +27,8 @@ public class CollectorJob extends Job {
 	private boolean canInteract;
 	private Random random = new Random();
 
-	public CollectorJob(Villager entity, SerfData data, Location startLocation) {
-		super(entity, data, startLocation);
+	public CollectorJob(UUID entityID, SerfData data, Location startLocation) {
+		super(entityID, data, startLocation);
 	}
 
 	@Override
@@ -41,18 +43,20 @@ public class CollectorJob extends Job {
 			// Villager should not be working at night
 			return;
 		}
+		Villager villager = getEntity();
+		Inventory inventory = getInventory();
 
 		currentTick++;
 
 		Block block = startLocation.getBlock();
 		if (block.getType() != Material.CHEST) {
-			System.out.println("Skipping collecting since no chest was found");
+			System.err.println("Skipping collecting since no chest was found");
 			nextJob();
 			return;
 		}
 
 		Chest chest = (Chest) block.getState();
-		double distance = entity.getLocation().distance(startLocation);
+		double distance = villager.getLocation().distance(startLocation);
 
 		if (getTime() > 1000 * 15) {
 			nextJob();
@@ -60,18 +64,18 @@ public class CollectorJob extends Job {
 		}
 
 		if (!canInteract) {
-			entity.getEquipment().setItemInMainHand(null);
+			villager.getEquipment().setItemInMainHand(null);
 			if (chest.isOpen()) {
 				chest.close();
 			}
 			return;
 		}
 
-		entity.lookAt(startLocation);
+		villager.lookAt(startLocation);
 		List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
 
 		if (distance < 1.5) {
-			entity.getPathfinder().stopPathfinding();
+			villager.getPathfinder().stopPathfinding();
 
 			if (currentTick % 10 != 0) {
 				return;
@@ -88,13 +92,13 @@ public class CollectorJob extends Job {
 						.findAny().orElse(null);
 
 				if (item != null) {
-					entity.swingMainHand();
+					villager.swingMainHand();
 					// entity.shakeHead();
 					chest.getInventory().addItem(item);
 					inventory.remove(item);
 
-					entity.getEquipment().setItemInMainHand(new ItemStack(item.getType()));
-					entity.getWorld().playSound(entity.getLocation(), Sound.ITEM_BOOK_PUT, 1, 1);
+					villager.getEquipment().setItemInMainHand(new ItemStack(item.getType()));
+					villager.getWorld().playSound(villager.getLocation(), Sound.ITEM_BOOK_PUT, 1, 1);
 					System.out.println("Storing " + item + " in chest");
 				} else {
 					canInteract = false;
@@ -112,8 +116,8 @@ public class CollectorJob extends Job {
 				ItemStack chestItem = chestSeeds.get(random.nextInt(chestSeeds.size()));
 
 				if (chestItem != null) {
-					entity.swingMainHand();
-					entity.shakeHead();
+					villager.swingMainHand();
+					villager.shakeHead();
 
 					int count = chestItem.getAmount() > 4 ? chestItem.getAmount() / 4 : 1;
 
@@ -121,8 +125,8 @@ public class CollectorJob extends Job {
 					chestItem.setAmount(chestItem.getAmount() - count);
 					// chest.getInventory().remove(chestItem);
 
-					entity.getEquipment().setItemInMainHand(new ItemStack(chestItem.getType()));
-					entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1);
+					villager.getEquipment().setItemInMainHand(new ItemStack(chestItem.getType()));
+					villager.getWorld().playSound(villager.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1);
 
 					System.out.println("Collecting " + chestItem.getType() + " x " + count + " from chest");
 					canInteract = false;
@@ -135,8 +139,8 @@ public class CollectorJob extends Job {
 			return;
 
 		} else {
-			if (canInteract) {
-				entity.getPathfinder().moveTo(startLocation, 0.5);
+			if (canInteract && (canCollect || canStore)) {
+				villager.getPathfinder().moveTo(startLocation, 0.5);
 			}
 		}
 
@@ -146,9 +150,9 @@ public class CollectorJob extends Job {
 	protected void nextJob() {
 		Job nextJob;
 		if (canCollect) {
-			nextJob = new PlanterJob(entity, data, startLocation);
+			nextJob = new PlanterJob(entityID, data, startLocation);
 		} else {
-			nextJob = new HarvesterJob(entity, data, startLocation);
+			nextJob = new HarvesterJob(entityID, data, startLocation);
 		}
 		data.setBehavior(nextJob);
 	}
@@ -163,7 +167,10 @@ public class CollectorJob extends Job {
 			}
 		}
 
-		entity.getEquipment().setItemInMainHand(null);
+		Villager villager = getEntity();
+		if (villager != null) {
+			villager.getEquipment().setItemInMainHand(null);
+		}
 	}
 
 }
