@@ -54,7 +54,7 @@ public class CollectorJob extends Job {
 		Chest chest = (Chest) block.getState();
 		double distance = entity.getLocation().distance(startLocation);
 
-		if (getTime() > 1000 * 30) {
+		if (getTime() > 1000 * 15) {
 			nextJob();
 			return;
 		}
@@ -106,6 +106,7 @@ public class CollectorJob extends Job {
 
 				var chestSeeds = Stream.of(chest.getInventory().getContents())
 						.filter(x -> x != null && Utils.isSeed(x.getType()))
+						.filter(x -> x.getAmount() > 4)
 						.collect(Collectors.toList());
 
 				ItemStack chestItem = chestSeeds.get(random.nextInt(chestSeeds.size()));
@@ -114,7 +115,7 @@ public class CollectorJob extends Job {
 					entity.swingMainHand();
 					entity.shakeHead();
 
-					int count = chestItem.getAmount() > 8 ? chestItem.getAmount() / 8 : 1;
+					int count = chestItem.getAmount() > 4 ? chestItem.getAmount() / 4 : 1;
 
 					inventory.addItem(new ItemStack(chestItem.getType(), count));
 					chestItem.setAmount(chestItem.getAmount() - count);

@@ -102,6 +102,6 @@ public class SerfManager {
 							entity.setGlowing(serf.isSelected());
 						});
 			}
-		}.runTaskTimer(Main.plugin, 0, 5);
+		}.runTaskTimer(Main.plugin, 0, 2);
 	};
 }

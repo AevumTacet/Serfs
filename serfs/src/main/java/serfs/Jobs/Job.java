@@ -22,6 +22,8 @@ public abstract class Job {
 		this.startTime = System.currentTimeMillis();
 		this.startLocation = startLocation;
 		inventory = entity.getInventory();
+
+		System.out.println("Starting Job: " + this.getClass().getName());
 	}
 
 	protected long getTime() {

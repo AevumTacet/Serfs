@@ -23,7 +23,7 @@ public class HarvesterJob extends Job {
 
 	@Override
 	public void onBehaviorStart() {
-		nearbyBlocks = Utils.getNearbyBlocks(startLocation, 15, 5, 15, material -> Utils.isHarvestable(material));
+		nearbyBlocks = Utils.getNearbyBlocks(startLocation, 20, 5, 20, material -> Utils.isHarvestable(material));
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class HarvesterJob extends Job {
 			}
 		}
 
-		if (getTime() > 1000 * 60) {
+		if (getTime() > 1000 * 30) {
 			nextJob();
 		}
 	}

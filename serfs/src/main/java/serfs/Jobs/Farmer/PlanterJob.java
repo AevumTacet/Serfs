@@ -1,5 +1,6 @@
 package serfs.Jobs.Farmer;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -47,7 +48,7 @@ public class PlanterJob extends Job {
 		}
 
 		if (target == null) {
-			var nearbyBlocks = Utils.getNearbyBlocks(startLocation, 15, 5, 15, material -> material == Material.FARMLAND);
+			var nearbyBlocks = Utils.getNearbyBlocks(startLocation, 20, 5, 20, material -> material == Material.FARMLAND);
 			target = nearbyBlocks.stream()
 					.filter(block -> block.getRelative(BlockFace.UP).getType() == Material.AIR)
 					.min(Comparator.comparingDouble(block -> block.getLocation().distance(entity.getLocation())))
@@ -92,14 +93,17 @@ public class PlanterJob extends Job {
 			}
 		}
 
-		if (getTime() > 1000 * 60) {
+		if (getTime() > 1000 * 30) {
 			nextJob();
 		}
 	}
 
 	@Override
 	protected void nextJob() {
-		boolean canStore = inventory.getSize() > 0;
+		List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
+		long cropNumber = inventoryList.stream().filter(x -> x != null && Utils.isCrop(x.getType())).count();
+
+		boolean canStore = cropNumber > 0;
 		Job nextJob = new CollectorJob(entity, data, startLocation);
 		((CollectorJob) nextJob).canStore = canStore;
 		data.setBehavior(nextJob);
