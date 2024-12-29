@@ -12,6 +12,8 @@ public class Main extends JavaPlugin {
         plugin = this;
         super.onEnable();
         manager = new SerfManager(this.getLogger());
+        manager.restorePlayers();
+
         EventsHandler handler = new EventsHandler(this.getLogger());
         getServer().getPluginManager().registerEvents(handler, this);
     }

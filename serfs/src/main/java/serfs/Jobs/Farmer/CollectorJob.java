@@ -32,6 +32,11 @@ public class CollectorJob extends Job {
 	}
 
 	@Override
+	protected String getJobID() {
+		return "FARMER";
+	}
+
+	@Override
 	public void onBehaviorStart() {
 		currentTick = 0;
 		canInteract = true;

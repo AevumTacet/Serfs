@@ -4,8 +4,16 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public class PlayerData {
+import de.tr7zw.nbtapi.NBTCompound;
+import serfs.IO.Serializable;
+
+public class PlayerData implements Serializable {
 	private UUID playerID;
+
+	public UUID getPlayerID() {
+		return playerID;
+	}
+
 	private HashMap<UUID, SerfData> serfs;
 
 	public PlayerData(UUID playerID) {
@@ -28,5 +36,14 @@ public class PlayerData {
 
 	public Stream<SerfData> getServants() {
 		return serfs.values().stream();
+	}
+
+	@Override
+	public void export(NBTCompound nbt) {
+		var comp = nbt.addCompound(playerID.toString());
+		comp.setString("PlayerID", playerID.toString());
+
+		var serfComp = comp.addCompound("Serfs");
+		getServants().forEach(state -> state.export(serfComp));
 	}
 }

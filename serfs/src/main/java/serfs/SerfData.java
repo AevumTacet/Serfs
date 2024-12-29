@@ -12,19 +12,25 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 
+import de.tr7zw.nbtapi.NBTCompound;
+import serfs.IO.Serializable;
 import serfs.Jobs.Job;
 import serfs.Jobs.NoJob;
 import serfs.Jobs.Farmer.HarvesterJob;
 
-public class SerfData {
+public class SerfData implements Serializable {
 	private UUID entityID;
 	private UUID ownerID;
 	private boolean selected;
 	private Job behavior;
 
+	public SerfData(UUID entityID, UUID playerID) {
+		this.entityID = entityID;
+		this.ownerID = playerID;
+	}
+
 	public SerfData(LivingEntity entity, Player owner) {
-		this.entityID = entity.getUniqueId();
-		this.ownerID = owner.getUniqueId();
+		this(entity.getUniqueId(), owner.getUniqueId());
 	}
 
 	public boolean isSelected() {
@@ -106,6 +112,15 @@ public class SerfData {
 			return entityID.equals(other.entityID);
 		}
 		return false;
+	}
+
+	@Override
+	public void export(NBTCompound nbt) {
+		var comp = nbt.addCompound(entityID.toString());
+
+		comp.setString("EntityID", entityID.toString());
+		comp.setString("OwnerID", ownerID.toString());
+		behavior.export(comp);
 	}
 
 }

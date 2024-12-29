@@ -24,6 +24,11 @@ public class HarvesterJob extends Job {
 	}
 
 	@Override
+	protected String getJobID() {
+		return "FARMER";
+	}
+
+	@Override
 	public void onBehaviorStart() {
 		nearbyBlocks = Utils.getNearbyBlocks(startLocation, 20, 5, 20, material -> Utils.isHarvestable(material));
 	}

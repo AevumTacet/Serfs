@@ -14,6 +14,11 @@ public class NoJob extends Job {
 	}
 
 	@Override
+	protected String getJobID() {
+		return "FOLLOW";
+	}
+
+	@Override
 	public void onBehaviorStart() {
 	}
 

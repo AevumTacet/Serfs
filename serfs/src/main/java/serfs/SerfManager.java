@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
@@ -15,10 +16,13 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import serfs.IO.Deserializer;
+import serfs.IO.NBTExporter;
 import serfs.Jobs.NoJob;
 
 public class SerfManager {
 	private Logger logger;
+	private NBTExporter nbt = new NBTExporter(Main.plugin);
 	private HashMap<UUID, PlayerData> playerData = new HashMap<UUID, PlayerData>();
 	private static HashSet<UUID> trackedSerfs = new HashSet<UUID>();
 
@@ -27,7 +31,38 @@ public class SerfManager {
 		Update();
 	}
 
-	public boolean isServant(Entity entity) {
+	public void savePlayers(boolean verbose) {
+		nbt.clear();
+		playerData.values().forEach(player -> nbt.writePlayer(player));
+		nbt.save();
+		if (verbose == true) {
+			logger.info("Saved player data for " + playerData.size() + " players.");
+		}
+	}
+
+	public void restorePlayers() {
+		playerData.clear();
+		var container = nbt.getDataContainer();
+
+		container.getKeys().stream()
+				.map(key -> container.getCompound(key))
+				.map(comp -> Deserializer.readPlayerData(comp))
+				.forEach(state -> {
+					playerData.put(state.getPlayerID(), state);
+				});
+
+		logger.info("Restored data for " + container.getKeys().size() + " players.");
+
+		trackedSerfs = getServants()
+				.map(data -> data.getEntityID())
+				.collect(Collectors.toCollection(HashSet::new));
+
+		logger.info("Restored " + trackedSerfs.size() + " entities.");
+	}
+
+	public boolean isServant
+
+	(Entity entity) {
 		return entity instanceof Villager && trackedSerfs.contains(entity.getUniqueId());
 	}
 

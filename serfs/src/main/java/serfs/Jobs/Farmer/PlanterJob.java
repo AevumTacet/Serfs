@@ -26,12 +26,16 @@ public class PlanterJob extends Job {
 	}
 
 	@Override
+	protected String getJobID() {
+		return "FARMER";
+	}
+
+	@Override
 	public void onBehaviorStart() {
 		Villager villager = getEntity();
 		if (villager != null) {
 			villager.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_HOE));
 		}
-
 	}
 
 	@Override
