@@ -21,6 +21,9 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         super.onDisable();
+
+        getLogger().info("Saving Serf NBT state.");
+        manager.savePlayers(true);
     }
 
     @Override

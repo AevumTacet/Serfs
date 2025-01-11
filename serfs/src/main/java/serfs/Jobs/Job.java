@@ -13,11 +13,12 @@ import serfs.SerfData;
 import serfs.IO.Serializable;
 
 public abstract class Job implements Serializable {
+	public boolean jobStarted;
+
 	protected UUID entityID;
 	protected SerfData data;
 	protected Location startLocation;
 	protected long startTime;
-
 	protected Block target;
 
 	public Job(UUID entityID, SerfData data, Location startLocation) {
@@ -25,6 +26,7 @@ public abstract class Job implements Serializable {
 		this.data = data;
 		this.startTime = System.currentTimeMillis();
 		this.startLocation = startLocation;
+		this.jobStarted = false;
 		System.out.println("Starting Job: " + this.getClass().getName());
 	}
 
@@ -67,10 +69,10 @@ public abstract class Job implements Serializable {
 		comp.setString("CurrentBehavior", getJobID());
 
 		if (startLocation != null) {
-			nbt.setString("StartLocationW", startLocation.getWorld().getName());
-			nbt.setDouble("StartLocationX", startLocation.getX());
-			nbt.setDouble("StartLocationY", startLocation.getY());
-			nbt.setDouble("StartLocationZ", startLocation.getZ());
+			comp.setString("StartLocationW", startLocation.getWorld().getName());
+			comp.setDouble("StartLocationX", startLocation.getX());
+			comp.setDouble("StartLocationY", startLocation.getY());
+			comp.setDouble("StartLocationZ", startLocation.getZ());
 		}
 		this.onSetPersistentData(comp);
 	}

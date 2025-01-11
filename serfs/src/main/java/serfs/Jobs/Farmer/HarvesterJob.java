@@ -55,7 +55,6 @@ public class HarvesterJob extends Job {
 					.orElse(null);
 
 			if (target == null) {
-				System.err.println("Skipping Harvest since no valid blocks were found");
 				nextJob();
 				return;
 			}

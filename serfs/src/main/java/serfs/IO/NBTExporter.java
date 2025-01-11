@@ -19,10 +19,10 @@ public class NBTExporter {
         File worldDir = Bukkit.getWorlds().get(0).getWorldFolder();
 
         try {
-            file = new NBTFile(new File(worldDir, "thrall.dat"));
+            file = new NBTFile(new File(worldDir, "serf.dat"));
             this.getDataContainer();
         } catch (IOException e) {
-            logger.warning("Thrall master NBT IO could not be initialized!");
+            logger.warning("Serfs NBT IO could not be initialized!");
             e.printStackTrace();
         }
     }

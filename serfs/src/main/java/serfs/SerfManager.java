@@ -18,6 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import serfs.IO.Deserializer;
 import serfs.IO.NBTExporter;
+import serfs.Jobs.Job;
 import serfs.Jobs.NoJob;
 
 public class SerfManager {
@@ -96,7 +97,6 @@ public class SerfManager {
 
 		logger.info("Registering Serf with UUID: " + entityID);
 
-		Bukkit.getMobGoals().getAllGoals(entity).forEach(x -> System.out.println(x));
 		Bukkit.getMobGoals().removeAllGoals(entity);
 		entity.setMemory(MemoryKey.HOME, null);
 		entity.setPersistent(true);
@@ -125,8 +125,13 @@ public class SerfManager {
 						.filter(serf -> serf != null && serf.getEntity() != null && serf.getOwner() != null)
 						.forEach(serf -> {
 							Entity entity = serf.getEntity();
+							Job currentJob = serf.getBehavior();
 
-							serf.getBehavior().onBehaviorTick();
+							if (!currentJob.jobStarted) {
+								currentJob.onBehaviorStart();
+							}
+
+							currentJob.onBehaviorTick();
 
 							if (serf.isSelected()) {
 								entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation(), 10);

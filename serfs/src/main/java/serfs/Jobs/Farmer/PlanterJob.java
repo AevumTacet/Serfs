@@ -54,7 +54,6 @@ public class PlanterJob extends Job {
 				.collect(Collectors.toList());
 
 		if (seeds.size() == 0) {
-			System.err.println("Skipping planting since Villager has no seeds left");
 			nextJob();
 			return;
 		}
@@ -67,7 +66,6 @@ public class PlanterJob extends Job {
 					.orElse(null);
 
 			if (target == null) {
-				System.err.println("Skipping planting since no valid blocks were found");
 				nextJob();
 				return;
 			}
@@ -85,7 +83,6 @@ public class PlanterJob extends Job {
 
 						ItemStack seed = seeds.get(index);
 						if (seed != null && seed.getType() != null) {
-							System.out.println("Attempting to plant " + seed.getType());
 							relative.setType(Utils.seedToBlockMap.getOrDefault(seed.getType(), Material.AIR));
 
 							inventory.remove(seed);
@@ -96,7 +93,6 @@ public class PlanterJob extends Job {
 							}
 						}
 					}
-					System.out.println("Seed count: " + seeds.size());
 				}
 
 				target = null;

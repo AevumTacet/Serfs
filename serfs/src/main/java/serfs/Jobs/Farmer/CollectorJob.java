@@ -55,7 +55,6 @@ public class CollectorJob extends Job {
 
 		Block block = startLocation.getBlock();
 		if (block.getType() != Material.CHEST) {
-			System.err.println("Skipping collecting since no chest was found");
 			nextJob();
 			return;
 		}
@@ -104,7 +103,6 @@ public class CollectorJob extends Job {
 
 					villager.getEquipment().setItemInMainHand(new ItemStack(item.getType()));
 					villager.getWorld().playSound(villager.getLocation(), Sound.ITEM_BOOK_PUT, 1, 1);
-					System.out.println("Storing " + item + " in chest");
 				} else {
 					canInteract = false;
 					return;
@@ -133,7 +131,6 @@ public class CollectorJob extends Job {
 					villager.getEquipment().setItemInMainHand(new ItemStack(chestItem.getType()));
 					villager.getWorld().playSound(villager.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1);
 
-					System.out.println("Collecting " + chestItem.getType() + " x " + count + " from chest");
 					canInteract = false;
 					nextJob();
 					return;

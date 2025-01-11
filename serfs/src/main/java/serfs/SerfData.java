@@ -57,11 +57,14 @@ public class SerfData implements Serializable {
 	}
 
 	public void setBehavior(Job newBehavior) {
-		if (this.behavior != null) {
-			this.behavior.onBehaviorEnd();
+		if (getEntity() != null) {
+			if (this.behavior != null) {
+				this.behavior.onBehaviorEnd();
+			}
+			newBehavior.onBehaviorStart();
+			newBehavior.jobStarted = true;
 		}
 
-		newBehavior.onBehaviorStart();
 		this.behavior = newBehavior;
 	}
 
