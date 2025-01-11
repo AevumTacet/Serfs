@@ -3,11 +3,13 @@ package serfs.Jobs;
 import java.util.UUID;
 
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import serfs.SerfData;
 
 public class NoJob extends Job {
+	public boolean canFollow = true;
 
 	public NoJob(UUID entityID, SerfData data, Location startLocation) {
 		super(entityID, data, startLocation);
@@ -25,7 +27,7 @@ public class NoJob extends Job {
 	@Override
 	public void onBehaviorTick() {
 		Player owner = data.getOwner();
-		if (owner == null) {
+		if (owner == null || !canFollow) {
 			return;
 		}
 		Villager villager = getEntity();
@@ -40,6 +42,15 @@ public class NoJob extends Job {
 			villager.getPathfinder().moveTo(owner.getLocation(), speed);
 		} else {
 			villager.getPathfinder().stopPathfinding();
+		}
+	}
+
+	@Override
+	public void onBehaviorInteract() {
+		if (!canFollow) {
+			Villager villager = getEntity();
+			villager.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, villager.getEyeLocation(), 10, 1, 1, 1, 0.1);
+			this.canFollow = true;
 		}
 	}
 

@@ -103,7 +103,12 @@ public class SerfManager {
 		entity.setRemoveWhenFarAway(false);
 
 		SerfData serf = new SerfData(entity, owner);
-		serf.setBehavior(new NoJob(entityID, serf, entity.getLocation()));
+
+		NoJob job = new NoJob(entityID, serf, entity.getLocation());
+		job.canFollow = true;
+
+		serf.setBehavior(job);
+
 		data.addSerf(serf);
 		trackedSerfs.add(entityID);
 

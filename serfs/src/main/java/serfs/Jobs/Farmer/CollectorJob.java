@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -18,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import serfs.SerfData;
 import serfs.Utils;
 import serfs.Jobs.Job;
+import serfs.Jobs.NoJob;
 
 public class CollectorJob extends Job {
 	public boolean canStore;
@@ -55,7 +57,11 @@ public class CollectorJob extends Job {
 
 		Block block = startLocation.getBlock();
 		if (block.getType() != Material.CHEST) {
-			nextJob();
+			NoJob job = new NoJob(entityID, data, startLocation);
+			job.canFollow = false;
+
+			villager.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, villager.getEyeLocation(), 10, 1, 1, 1, 0.1);
+			data.setBehavior(job);
 			return;
 		}
 

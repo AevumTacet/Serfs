@@ -27,7 +27,6 @@ public abstract class Job implements Serializable {
 		this.startTime = System.currentTimeMillis();
 		this.startLocation = startLocation;
 		this.jobStarted = false;
-		System.out.println("Starting Job: " + this.getClass().getName());
 	}
 
 	protected Villager getEntity() {
