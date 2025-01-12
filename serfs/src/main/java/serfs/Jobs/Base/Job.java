@@ -3,7 +3,6 @@ package serfs.Jobs.Base;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import de.tr7zw.nbtapi.NBTCompound;
@@ -16,7 +15,6 @@ public abstract class Job implements Serializable {
 	protected UUID entityID;
 	protected SerfData data;
 	protected long startTime;
-	protected Block target;
 
 	public Job(SerfData data) {
 		this.entityID = data.getEntityID();

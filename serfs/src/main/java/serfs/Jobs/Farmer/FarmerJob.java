@@ -18,6 +18,7 @@ public abstract class FarmerJob extends SingleLocationJob implements ISequential
 	protected Location startLocation;
 	protected List<Block> nearbyBlocks;
 	private Predicate<Material> blockFilter;
+	protected Block target;
 
 	public FarmerJob(SerfData data, Location startLocation, Predicate<Material> blockFilter) {
 		super(data, startLocation);
