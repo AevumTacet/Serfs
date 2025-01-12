@@ -11,8 +11,8 @@ import serfs.SerfData;
 public class NoJob extends Job {
 	public boolean canFollow = true;
 
-	public NoJob(UUID entityID, SerfData data, Location startLocation) {
-		super(entityID, data, startLocation);
+	public NoJob(SerfData data, Location startLocation) {
+		super(data, startLocation);
 	}
 
 	@Override

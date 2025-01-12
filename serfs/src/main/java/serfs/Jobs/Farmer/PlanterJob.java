@@ -21,8 +21,8 @@ import serfs.Utils;
 import serfs.Jobs.Job;
 
 public class PlanterJob extends Job {
-	public PlanterJob(UUID entityID, SerfData data, Location startLocation) {
-		super(entityID, data, startLocation);
+	public PlanterJob(SerfData data, Location startLocation) {
+		super(data, startLocation);
 	}
 
 	@Override
@@ -118,7 +118,8 @@ public class PlanterJob extends Job {
 		}
 
 		boolean canStore = cropNumber > 0;
-		Job nextJob = new CollectorJob(entityID, data, startLocation);
+		Job nextJob = new CollectorJob(data, startLocation, "FARMER", () -> new HarvesterJob(data, startLocation),
+				x -> Utils.isSeed(x.getType()));
 		((CollectorJob) nextJob).canStore = canStore;
 		data.setBehavior(nextJob);
 	}

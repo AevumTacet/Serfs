@@ -19,8 +19,8 @@ import serfs.Jobs.Job;
 public class HarvesterJob extends Job {
 	private List<Block> nearbyBlocks;
 
-	public HarvesterJob(UUID entityID, SerfData data, Location startLocation) {
-		super(entityID, data, startLocation);
+	public HarvesterJob(SerfData data, Location startLocation) {
+		super(data, startLocation);
 	}
 
 	@Override
@@ -88,10 +88,11 @@ public class HarvesterJob extends Job {
 
 		Job nextJob;
 		if (seedNumber == 0) {
-			nextJob = new CollectorJob(entityID, data, startLocation);
+			nextJob = new CollectorJob(data, startLocation, "FARMER", () -> new PlanterJob(data, startLocation),
+					x -> Utils.isSeed(x.getType()));
 			((CollectorJob) nextJob).canCollect = true;
 		} else {
-			nextJob = new PlanterJob(entityID, data, startLocation);
+			nextJob = new PlanterJob(data, startLocation);
 		}
 		data.setBehavior(nextJob);
 	}

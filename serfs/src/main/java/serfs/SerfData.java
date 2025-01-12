@@ -95,7 +95,7 @@ public class SerfData implements Serializable {
 
 			if (profession == Villager.Profession.FARMER && block.getType() == Material.CHEST) {
 				getVillager().getInventory().clear();
-				var farmerJob = new HarvesterJob(entityID, this, jobLocation);
+				var farmerJob = new HarvesterJob(this, jobLocation);
 				setBehavior(farmerJob);
 			}
 		}

@@ -21,8 +21,8 @@ public abstract class Job implements Serializable {
 	protected long startTime;
 	protected Block target;
 
-	public Job(UUID entityID, SerfData data, Location startLocation) {
-		this.entityID = entityID;
+	public Job(SerfData data, Location startLocation) {
+		this.entityID = data.getEntityID();
 		this.data = data;
 		this.startTime = System.currentTimeMillis();
 		this.startLocation = startLocation;

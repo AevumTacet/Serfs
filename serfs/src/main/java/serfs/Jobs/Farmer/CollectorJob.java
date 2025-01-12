@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
@@ -25,17 +28,25 @@ public class CollectorJob extends Job {
 	public boolean canStore;
 	public boolean canCollect;
 
+	private Predicate<ItemStack> itemFilter;
+	private Supplier<Job> nextJobSupplier;
+	private String jobID;
+
 	private int currentTick;
 	private boolean canInteract;
 	private Random random = new Random();
 
-	public CollectorJob(UUID entityID, SerfData data, Location startLocation) {
-		super(entityID, data, startLocation);
+	public CollectorJob(SerfData data, Location startLocation, String jobID, Supplier<Job> nextJob,
+			Predicate<ItemStack> itemFilter) {
+		super(data, startLocation);
+		this.jobID = jobID;
+		this.nextJobSupplier = nextJob;
+		this.itemFilter = itemFilter;
 	}
 
 	@Override
 	protected String getJobID() {
-		return "FARMER";
+		return jobID;
 	}
 
 	@Override
@@ -57,9 +68,10 @@ public class CollectorJob extends Job {
 
 		Block block = startLocation.getBlock();
 		if (block.getType() != Material.CHEST) {
-			NoJob job = new NoJob(entityID, data, startLocation);
+			NoJob job = new NoJob(data, startLocation);
 			job.canFollow = false;
 
+			System.err.println("Villager chest was not found, reverting to NoJob.");
 			villager.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, villager.getEyeLocation(), 10, 1, 1, 1, 0.1);
 			data.setBehavior(job);
 			return;
@@ -118,8 +130,10 @@ public class CollectorJob extends Job {
 			if (canCollect && canInteract) {
 
 				var chestSeeds = Stream.of(chest.getInventory().getContents())
-						.filter(x -> x != null && Utils.isSeed(x.getType()))
-						.filter(x -> x.getAmount() > 4)
+						.filter(x -> x != null)
+						.filter(itemFilter)
+						// .filter(x -> x != null && Utils.isSeed(x.getType()))
+						// .filter(x -> x.getAmount() > 4)
 						.collect(Collectors.toList());
 
 				ItemStack chestItem = chestSeeds.get(random.nextInt(chestSeeds.size()));
@@ -156,13 +170,16 @@ public class CollectorJob extends Job {
 
 	@Override
 	protected void nextJob() {
-		Job nextJob;
-		if (canCollect) {
-			nextJob = new PlanterJob(entityID, data, startLocation);
-		} else {
-			nextJob = new HarvesterJob(entityID, data, startLocation);
-		}
+		Job nextJob = nextJobSupplier.get();
 		data.setBehavior(nextJob);
+
+		// Job nextJob;
+		// if (canCollect) {
+		// nextJob = new PlanterJob(entityID, data, startLocation);
+		// } else {
+		// nextJob = new HarvesterJob(entityID, data, startLocation);
+		// }
+		// data.setBehavior(nextJob);
 	}
 
 	@Override
