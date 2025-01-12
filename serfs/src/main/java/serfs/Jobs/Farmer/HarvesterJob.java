@@ -3,18 +3,16 @@ package serfs.Jobs.Farmer;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
 import serfs.SerfData;
 import serfs.Utils;
 import serfs.Jobs.Job;
+import serfs.Jobs.Storage.CollectorJob;
 
 public class HarvesterJob extends Job {
 	private List<Block> nearbyBlocks;
@@ -35,11 +33,6 @@ public class HarvesterJob extends Job {
 
 	@Override
 	public void onBehaviorTick() {
-		if (!Utils.isDay()) {
-			// Villager should not be working at night
-			return;
-		}
-
 		Villager villager = getEntity();
 
 		if (target == null) {
@@ -86,15 +79,20 @@ public class HarvesterJob extends Job {
 			seedNumber = 0;
 		}
 
-		Job nextJob;
 		if (seedNumber == 0) {
-			nextJob = new CollectorJob(data, startLocation, "FARMER", () -> new PlanterJob(data, startLocation),
-					x -> Utils.isSeed(x.getType()));
-			((CollectorJob) nextJob).canCollect = true;
+			var nextJob = new CollectorJob(data, startLocation, x -> Utils.isSeed(x.getType()), getJobID());
+			nextJob.setNextJob(() -> new PlanterJob(data, startLocation));
+			data.setBehavior(nextJob);
+
+			Villager villager = getEntity();
+			if (villager != null) {
+				villager.shakeHead();
+			}
+
 		} else {
-			nextJob = new PlanterJob(data, startLocation);
+			var nextJob = new PlanterJob(data, startLocation);
+			data.setBehavior(nextJob);
 		}
-		data.setBehavior(nextJob);
 	}
 
 }

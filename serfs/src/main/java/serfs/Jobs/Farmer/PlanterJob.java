@@ -4,10 +4,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import serfs.SerfData;
 import serfs.Utils;
 import serfs.Jobs.Job;
+import serfs.Jobs.Storage.StockerJob;
 
 public class PlanterJob extends Job {
 	public PlanterJob(SerfData data, Location startLocation) {
@@ -40,11 +39,6 @@ public class PlanterJob extends Job {
 
 	@Override
 	public void onBehaviorTick() {
-		if (!Utils.isDay()) {
-			// Villager should not be working at night
-			return;
-		}
-
 		Villager villager = getEntity();
 		Inventory inventory = getInventory();
 
@@ -117,10 +111,9 @@ public class PlanterJob extends Job {
 			cropNumber = 0;
 		}
 
-		boolean canStore = cropNumber > 0;
-		Job nextJob = new CollectorJob(data, startLocation, "FARMER", () -> new HarvesterJob(data, startLocation),
-				x -> Utils.isSeed(x.getType()));
-		((CollectorJob) nextJob).canStore = canStore;
+		var nextJob = new StockerJob(data, startLocation, x -> Utils.isSeed(x.getType()), "FARMER");
+		nextJob.setNextJob(() -> new HarvesterJob(data, startLocation));
+		nextJob.setCanInteract(cropNumber > 0);
 		data.setBehavior(nextJob);
 	}
 

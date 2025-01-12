@@ -125,7 +125,8 @@ public class SerfManager {
 			@Override
 			public void run() {
 				getServants()
-						.filter(serf -> serf != null && serf.getEntity() != null && serf.getOwner() != null)
+						.filter(serf -> serf != null)
+						.filter(serf -> serf.getEntity() != null)
 						.forEach(serf -> {
 							Entity entity = serf.getEntity();
 							Job currentJob = serf.getBehavior();
@@ -134,7 +135,10 @@ public class SerfManager {
 								currentJob.onBehaviorStart();
 							}
 
-							currentJob.onBehaviorTick();
+							if (Utils.isDay() || currentJob instanceof NoJob) {
+								// Villager should not be working at night unless they have no job
+								currentJob.onBehaviorTick();
+							}
 
 							if (serf.isSelected()) {
 								entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation(), 10);

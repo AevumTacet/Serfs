@@ -1,7 +1,5 @@
 package serfs.Jobs;
 
-import java.util.UUID;
-
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -30,6 +28,7 @@ public class NoJob extends Job {
 		if (owner == null || !canFollow) {
 			return;
 		}
+
 		Villager villager = getEntity();
 
 		villager.setTarget(owner);
