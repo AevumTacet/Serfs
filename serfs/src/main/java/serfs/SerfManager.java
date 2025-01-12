@@ -18,8 +18,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import serfs.IO.Deserializer;
 import serfs.IO.NBTExporter;
-import serfs.Jobs.Job;
 import serfs.Jobs.NoJob;
+import serfs.Jobs.Base.Job;
 
 public class SerfManager {
 	private Logger logger;
@@ -103,7 +103,7 @@ public class SerfManager {
 		entity.setRemoveWhenFarAway(false);
 
 		SerfData serf = new SerfData(entity, owner);
-		NoJob job = new NoJob(serf, entity.getLocation());
+		var job = new NoJob(serf);
 		job.canFollow = true;
 		serf.setBehavior(job);
 

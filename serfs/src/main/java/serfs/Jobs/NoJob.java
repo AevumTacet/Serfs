@@ -1,16 +1,16 @@
 package serfs.Jobs;
 
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import serfs.SerfData;
+import serfs.Jobs.Base.Job;
 
 public class NoJob extends Job {
 	public boolean canFollow = true;
 
-	public NoJob(SerfData data, Location startLocation) {
-		super(data, startLocation);
+	public NoJob(SerfData data) {
+		super(data);
 	}
 
 	@Override
@@ -51,11 +51,6 @@ public class NoJob extends Job {
 			villager.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, villager.getEyeLocation(), 10, 1, 1, 1, 0.1);
 			this.canFollow = true;
 		}
-	}
-
-	@Override
-	protected void nextJob() {
-
 	}
 
 }

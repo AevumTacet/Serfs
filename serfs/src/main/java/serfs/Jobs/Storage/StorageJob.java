@@ -11,9 +11,11 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
-import serfs.Jobs.Job;
+import serfs.Jobs.Base.Job;
+import serfs.Jobs.Base.ISequentialJob;
+import serfs.Jobs.Base.SingleLocationJob;
 
-public abstract class StorageJob extends Job {
+public abstract class StorageJob extends SingleLocationJob implements ISequentialJob {
 
 	private Predicate<ItemStack> itemFilter;
 	private Supplier<Job> nextJobSupplier;
@@ -28,8 +30,9 @@ public abstract class StorageJob extends Job {
 		this.canInteract = canInteract;
 	}
 
-	public StorageJob(SerfData data, Location startLocation, Predicate<ItemStack> itemFilter, String jobID) {
-		super(data, startLocation);
+	public StorageJob(SerfData data, Location chestocation, Predicate<ItemStack> itemFilter, String jobID) {
+		super(data, chestocation);
+
 		this.itemFilter = itemFilter;
 		this.jobID = jobID;
 	}
@@ -59,8 +62,7 @@ public abstract class StorageJob extends Job {
 
 	}
 
-	@Override
-	protected final void nextJob() {
+	public final void nextJob() {
 		if (nextJobSupplier != null) {
 			Job nextJob = nextJobSupplier.get();
 			data.setBehavior(nextJob);

@@ -8,8 +8,8 @@ import org.bukkit.Location;
 import de.tr7zw.nbtapi.NBTCompound;
 import serfs.PlayerData;
 import serfs.SerfData;
-import serfs.Jobs.Job;
 import serfs.Jobs.NoJob;
+import serfs.Jobs.Base.Job;
 import serfs.Jobs.Farmer.HarvesterJob;
 import serfs.Main;
 

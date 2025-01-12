@@ -9,11 +9,13 @@ import org.bukkit.block.Block;
 
 import serfs.SerfData;
 import serfs.Utils;
-import serfs.Jobs.Job;
+import serfs.Jobs.Base.ISequentialJob;
+import serfs.Jobs.Base.SingleLocationJob;
 
-public abstract class FarmerJob extends Job {
+public abstract class FarmerJob extends SingleLocationJob implements ISequentialJob {
 	public int horizontalDistance;
 	public int verticalDistance;
+	protected Location startLocation;
 	protected List<Block> nearbyBlocks;
 	private Predicate<Material> blockFilter;
 
@@ -35,5 +37,7 @@ public abstract class FarmerJob extends Job {
 		nearbyBlocks = Utils.getNearbyBlocks(startLocation,
 				horizontalDistance, verticalDistance, horizontalDistance, blockFilter);
 	}
+
+	public abstract void nextJob();
 
 }

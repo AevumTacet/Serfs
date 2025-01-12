@@ -14,8 +14,8 @@ import org.bukkit.entity.Villager;
 
 import de.tr7zw.nbtapi.NBTCompound;
 import serfs.IO.Serializable;
-import serfs.Jobs.Job;
 import serfs.Jobs.NoJob;
+import serfs.Jobs.Base.Job;
 import serfs.Jobs.Farmer.HarvesterJob;
 
 public class SerfData implements Serializable {

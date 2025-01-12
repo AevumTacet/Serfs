@@ -55,7 +55,7 @@ public final class HarvesterJob extends FarmerJob {
 	}
 
 	@Override
-	protected void nextJob() {
+	public void nextJob() {
 		Inventory inventory = getInventory();
 		long seedNumber;
 		if (inventory != null) {

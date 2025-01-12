@@ -99,7 +99,7 @@ public class PlanterJob extends FarmerJob {
 	}
 
 	@Override
-	protected void nextJob() {
+	public void nextJob() {
 		Inventory inventory = getInventory();
 		long cropNumber;
 		if (inventory != null) {

@@ -35,7 +35,7 @@ public final class StockerJob extends StorageJob {
 
 		Block block = startLocation.getBlock();
 		if (block.getType() != Material.CHEST) {
-			NoJob job = new NoJob(data, startLocation);
+			NoJob job = new NoJob(data);
 			job.canFollow = false;
 
 			System.err.println("Villager chest was not found, reverting to NoJob.");
