@@ -1,4 +1,4 @@
-package serfs.Jobs;
+package serfs.Jobs.Storage;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -11,8 +11,9 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
+import serfs.Jobs.Job;
 
-public abstract class AbstractItemStorageJob extends Job {
+public abstract class StorageJob extends Job {
 
 	private Predicate<ItemStack> itemFilter;
 	private Supplier<Job> nextJobSupplier;
@@ -27,7 +28,7 @@ public abstract class AbstractItemStorageJob extends Job {
 		this.canInteract = canInteract;
 	}
 
-	public AbstractItemStorageJob(SerfData data, Location startLocation, Predicate<ItemStack> itemFilter, String jobID) {
+	public StorageJob(SerfData data, Location startLocation, Predicate<ItemStack> itemFilter, String jobID) {
 		super(data, startLocation);
 		this.itemFilter = itemFilter;
 		this.jobID = jobID;

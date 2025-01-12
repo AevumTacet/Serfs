@@ -16,24 +16,28 @@ import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
 import serfs.Utils;
-import serfs.Jobs.Job;
 import serfs.Jobs.Storage.StockerJob;
 
-public class PlanterJob extends Job {
-	public PlanterJob(SerfData data, Location startLocation) {
-		super(data, startLocation);
-	}
+public class PlanterJob extends FarmerJob {
+	private List<ItemStack> seeds;
 
-	@Override
-	protected String getJobID() {
-		return "FARMER";
+	public PlanterJob(SerfData data, Location startLocation) {
+		super(data, startLocation, material -> material == Material.FARMLAND);
 	}
 
 	@Override
 	public void onBehaviorStart() {
+		super.onBehaviorStart();
+
 		Villager villager = getEntity();
 		if (villager != null) {
 			villager.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_HOE));
+
+			Inventory inventory = getInventory();
+			seeds = Stream.of(inventory.getContents())
+					.filter(item -> item != null)
+					.filter(item -> Utils.isSeed(item.getType()))
+					.collect(Collectors.toList());
 		}
 	}
 
@@ -42,18 +46,12 @@ public class PlanterJob extends Job {
 		Villager villager = getEntity();
 		Inventory inventory = getInventory();
 
-		List<ItemStack> seeds = Stream.of(inventory.getContents())
-				.filter(item -> item != null)
-				.filter(item -> Utils.isSeed(item.getType()))
-				.collect(Collectors.toList());
-
 		if (seeds.size() == 0) {
 			nextJob();
 			return;
 		}
 
 		if (target == null) {
-			var nearbyBlocks = Utils.getNearbyBlocks(startLocation, 20, 5, 20, material -> material == Material.FARMLAND);
 			target = nearbyBlocks.stream()
 					.filter(block -> block.getRelative(BlockFace.UP).getType() == Material.AIR)
 					.min(Comparator.comparingDouble(block -> block.getLocation().distance(villager.getLocation())))
@@ -111,7 +109,7 @@ public class PlanterJob extends Job {
 			cropNumber = 0;
 		}
 
-		var nextJob = new StockerJob(data, startLocation, x -> Utils.isSeed(x.getType()), "FARMER");
+		var nextJob = new StockerJob(data, startLocation, x -> Utils.isSeed(x.getType()), getJobID());
 		nextJob.setNextJob(() -> new HarvesterJob(data, startLocation));
 		nextJob.setCanInteract(cropNumber > 0);
 		data.setBehavior(nextJob);

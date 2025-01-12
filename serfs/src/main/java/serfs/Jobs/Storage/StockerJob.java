@@ -13,10 +13,9 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import serfs.SerfData;
-import serfs.Jobs.AbstractItemStorageJob;
 import serfs.Jobs.NoJob;
 
-public final class StockerJob extends AbstractItemStorageJob {
+public final class StockerJob extends StorageJob {
 	private int currentTick;
 
 	public StockerJob(SerfData data, Location startLocation, Predicate<ItemStack> itemFilter, String jobID) {

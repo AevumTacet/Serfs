@@ -4,31 +4,17 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import serfs.SerfData;
 import serfs.Utils;
-import serfs.Jobs.Job;
 import serfs.Jobs.Storage.CollectorJob;
 
-public class HarvesterJob extends Job {
-	private List<Block> nearbyBlocks;
-
+public final class HarvesterJob extends FarmerJob {
 	public HarvesterJob(SerfData data, Location startLocation) {
-		super(data, startLocation);
-	}
-
-	@Override
-	protected String getJobID() {
-		return "FARMER";
-	}
-
-	@Override
-	public void onBehaviorStart() {
-		nearbyBlocks = Utils.getNearbyBlocks(startLocation, 20, 5, 20, material -> Utils.isHarvestable(material));
+		super(data, startLocation, x -> Utils.isHarvestable(x));
 	}
 
 	@Override
@@ -74,7 +60,10 @@ public class HarvesterJob extends Job {
 		long seedNumber;
 		if (inventory != null) {
 			List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
-			seedNumber = inventoryList.stream().filter(x -> x != null && Utils.isSeed(x.getType())).count();
+			seedNumber = inventoryList.stream()
+					.filter(x -> x != null)
+					.filter(x -> Utils.isSeed(x.getType()))
+					.count();
 		} else {
 			seedNumber = 0;
 		}

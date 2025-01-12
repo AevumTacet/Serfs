@@ -15,10 +15,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import serfs.SerfData;
-import serfs.Jobs.AbstractItemStorageJob;
 import serfs.Jobs.NoJob;
 
-public final class CollectorJob extends AbstractItemStorageJob {
+public final class CollectorJob extends StorageJob {
 	private int currentTick;
 	private Random random = new Random();
 
