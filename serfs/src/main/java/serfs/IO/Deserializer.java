@@ -57,14 +57,14 @@ public interface Deserializer {
 
         Job behavior = switch (mode) {
             case "FARMER":
-                yield new HarvesterJob(data.getEntityID(), data, startLocation);
+                yield new HarvesterJob(data, startLocation);
 
             case "FOLLOW":
-                yield new NoJob(data.getEntityID(), data, startLocation);
+                yield new NoJob(data);
 
             default:
                 Main.plugin.getLogger().warning("Job state is unspecified, defaulting to follow");
-                yield new NoJob(data.getEntityID(), data, startLocation);
+                yield new NoJob(data);
         };
 
         return behavior;
