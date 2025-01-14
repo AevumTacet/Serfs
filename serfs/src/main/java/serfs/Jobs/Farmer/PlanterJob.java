@@ -13,9 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
 import serfs.SerfData;
-import serfs.Utils;
 import serfs.Jobs.Storage.StockerJob;
 
 public class PlanterJob extends FarmerJob {
@@ -32,12 +30,6 @@ public class PlanterJob extends FarmerJob {
 		Villager villager = getEntity();
 		if (villager != null) {
 			villager.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_HOE));
-
-			Inventory inventory = getInventory();
-			seeds = Stream.of(inventory.getContents())
-					.filter(item -> item != null)
-					.filter(item -> Utils.isSeed(item.getType()))
-					.collect(Collectors.toList());
 		}
 	}
 
@@ -45,6 +37,11 @@ public class PlanterJob extends FarmerJob {
 	public void onBehaviorTick() {
 		Villager villager = getEntity();
 		Inventory inventory = getInventory();
+
+		seeds = Stream.of(inventory.getContents())
+				.filter(item -> item != null)
+				.filter(item -> FarmerJob.isSeed(item.getType()))
+				.collect(Collectors.toList());
 
 		if (seeds.size() == 0) {
 			nextJob();
@@ -75,7 +72,7 @@ public class PlanterJob extends FarmerJob {
 
 						ItemStack seed = seeds.get(index);
 						if (seed != null && seed.getType() != null) {
-							relative.setType(Utils.seedToBlockMap.getOrDefault(seed.getType(), Material.AIR));
+							relative.setType(FarmerJob.seedToBlockMap.getOrDefault(seed.getType(), Material.AIR));
 
 							inventory.remove(seed);
 							int amount = seed.getAmount() - 1;
@@ -104,12 +101,12 @@ public class PlanterJob extends FarmerJob {
 		long cropNumber;
 		if (inventory != null) {
 			List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
-			cropNumber = inventoryList.stream().filter(x -> x != null && Utils.isCrop(x.getType())).count();
+			cropNumber = inventoryList.stream().filter(x -> x != null && FarmerJob.isCrop(x.getType())).count();
 		} else {
 			cropNumber = 0;
 		}
 
-		var nextJob = new StockerJob(data, startLocation, x -> Utils.isSeed(x.getType()), getJobID());
+		var nextJob = new StockerJob(data, startLocation, x -> FarmerJob.isSeed(x.getType()), getJobID());
 		nextJob.setNextJob(() -> new HarvesterJob(data, startLocation));
 		nextJob.setCanInteract(cropNumber > 0);
 		data.setBehavior(nextJob);

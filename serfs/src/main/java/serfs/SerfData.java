@@ -17,6 +17,7 @@ import serfs.IO.Serializable;
 import serfs.Jobs.NoJob;
 import serfs.Jobs.Base.Job;
 import serfs.Jobs.Farmer.HarvesterJob;
+import serfs.Jobs.Fueler.FuelerJob;
 
 public class SerfData implements Serializable {
 	private UUID entityID;
@@ -57,6 +58,10 @@ public class SerfData implements Serializable {
 	}
 
 	public void setBehavior(Job newBehavior) {
+		if (newBehavior == null) {
+			return;
+		}
+
 		if (getEntity() != null) {
 			if (this.behavior != null) {
 				this.behavior.onBehaviorEnd();
@@ -93,11 +98,17 @@ public class SerfData implements Serializable {
 		if (behavior != null && behavior instanceof NoJob) {
 			var profession = getProfession();
 
+			Job job = null;
+			getVillager().getInventory().clear();
+
 			if (profession == Villager.Profession.FARMER && block.getType() == Material.CHEST) {
-				getVillager().getInventory().clear();
-				var farmerJob = new HarvesterJob(this, jobLocation);
-				setBehavior(farmerJob);
+				job = new HarvesterJob(this, jobLocation);
 			}
+			if (profession == Villager.Profession.TOOLSMITH && block.getType() == Material.CHEST) {
+				job = new FuelerJob(this, jobLocation);
+			}
+
+			setBehavior(job);
 		}
 
 		getEntity().getWorld().playSound(getEntity().getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);

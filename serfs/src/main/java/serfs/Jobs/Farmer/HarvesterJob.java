@@ -9,18 +9,21 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import serfs.SerfData;
-import serfs.Utils;
 import serfs.Jobs.Storage.CollectorJob;
 
 public final class HarvesterJob extends FarmerJob {
 	public HarvesterJob(SerfData data, Location startLocation) {
-		super(data, startLocation, x -> Utils.isHarvestable(x));
+		super(data, startLocation, x -> FarmerJob.isHarvestable(x));
 	}
 
 	@Override
 	public void onBehaviorTick() {
 		Villager villager = getEntity();
 
+		if (getTime() > 1000 * 30) {
+			nextJob();
+			return;
+		}
 		if (target == null) {
 			target = nearbyBlocks.stream()
 					.filter(block -> {
@@ -49,9 +52,6 @@ public final class HarvesterJob extends FarmerJob {
 			}
 		}
 
-		if (getTime() > 1000 * 30) {
-			nextJob();
-		}
 	}
 
 	@Override
@@ -62,14 +62,15 @@ public final class HarvesterJob extends FarmerJob {
 			List<ItemStack> inventoryList = Arrays.asList(inventory.getContents());
 			seedNumber = inventoryList.stream()
 					.filter(x -> x != null)
-					.filter(x -> Utils.isSeed(x.getType()))
+					.map(x -> x.getType())
+					.filter(FarmerJob::isSeed)
 					.count();
 		} else {
 			seedNumber = 0;
 		}
 
 		if (seedNumber == 0) {
-			var nextJob = new CollectorJob(data, startLocation, x -> Utils.isSeed(x.getType()), getJobID());
+			var nextJob = new CollectorJob(data, startLocation, x -> FarmerJob.isSeed(x.getType()), getJobID());
 			nextJob.setNextJob(() -> new PlanterJob(data, startLocation));
 			data.setBehavior(nextJob);
 

@@ -41,7 +41,7 @@ public final class CollectorJob extends StorageJob {
 			NoJob job = new NoJob(data);
 			job.canFollow = false;
 
-			System.err.println("Villager chest was not found, reverting to NoJob.");
+			logger.warning("Villager chest was not found, reverting to NoJob.");
 			villager.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, villager.getEyeLocation(), 10, 1, 1, 1, 0.1);
 			data.setBehavior(job);
 			return;
