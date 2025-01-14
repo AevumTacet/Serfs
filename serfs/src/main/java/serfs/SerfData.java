@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.Villager.Profession;
 
 import de.tr7zw.nbtapi.NBTCompound;
 import serfs.IO.Serializable;
@@ -18,6 +19,7 @@ import serfs.Jobs.NoJob;
 import serfs.Jobs.Base.Job;
 import serfs.Jobs.Farmer.HarvesterJob;
 import serfs.Jobs.Fueler.FuelerJob;
+import serfs.Jobs.Supplier.SingleLocationJobSupplier;
 
 public class SerfData implements Serializable {
 	private UUID entityID;
@@ -96,19 +98,21 @@ public class SerfData implements Serializable {
 	public void assignJob(Location jobLocation) {
 		Block block = jobLocation.getBlock();
 		if (behavior != null && behavior instanceof NoJob) {
-			var profession = getProfession();
+			Profession profession = getProfession();
 
-			Job job = null;
+			JobDescription description = HireUtils.getDescription(profession);
+			if (description == null) {
+				return;
+			}
+
 			getVillager().getInventory().clear();
 
-			if (profession == Villager.Profession.FARMER && block.getType() == Material.CHEST) {
-				job = new HarvesterJob(this, jobLocation);
-			}
-			if (profession == Villager.Profession.TOOLSMITH && block.getType() == Material.CHEST) {
-				job = new FuelerJob(this, jobLocation);
+			if (block.getType() == Material.CHEST) {
+				var supplier = (SingleLocationJobSupplier) description.jobSupplier;
+				Job job = supplier.get(this, jobLocation);
+				setBehavior(job);
 			}
 
-			setBehavior(job);
 		}
 
 		getEntity().getWorld().playSound(getEntity().getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);

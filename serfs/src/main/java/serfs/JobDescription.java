@@ -3,20 +3,31 @@ package serfs;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
 
-import serfs.Jobs.Base.Job;
+import serfs.Jobs.Supplier.ISupplier;
+import serfs.Jobs.Supplier.JobSupplier;
+import serfs.Jobs.Supplier.SingleLocationJobSupplier;
 
 public class JobDescription {
-	public Class<? extends Job> jobClass;
 	public Villager.Profession targetProfession;
+	public ISupplier jobSupplier;
 	public String jobName;
 	public int hireCost;
 
-	public JobDescription(String jobName, Class<? extends Job> startJobClass, Profession targetProfession,
-			int hireCost) {
-		this.jobClass = startJobClass;
+	public JobDescription(String jobName, Profession targetProfession, int hireCost) {
 		this.targetProfession = targetProfession;
 		this.jobName = jobName;
 		this.hireCost = hireCost;
+	}
+
+	public JobDescription(String jobName, JobSupplier jobSupplier, Profession targetProfession, int hireCost) {
+		this(jobName, targetProfession, hireCost);
+		this.jobSupplier = jobSupplier;
+	}
+
+	public JobDescription(String jobName, SingleLocationJobSupplier jobSupplier, Profession targetProfession,
+			int hireCost) {
+		this(jobName, targetProfession, hireCost);
+		this.jobSupplier = jobSupplier;
 	}
 
 }

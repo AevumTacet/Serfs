@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -19,8 +17,10 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import net.kyori.adventure.text.Component;
+import serfs.Jobs.NoJob;
 import serfs.Jobs.Farmer.HarvesterJob;
 import serfs.Jobs.Fueler.FuelerJob;
+import serfs.Jobs.Supplier.JobSupplier;
 
 public final class HireUtils {
 	private HireUtils() {
@@ -30,15 +30,18 @@ public final class HireUtils {
 
 	public final static HashMap<String, JobDescription> jobMap = new HashMap<>() {
 		{
-			put("hire_farmer", new JobDescription("Farmer", HarvesterJob.class, Profession.FARMER, 64));
-			put("hire_fueler", new JobDescription("Fueler", FuelerJob.class, Profession.TOOLSMITH, 64));
+			put("hire_farmer",
+					new JobDescription("Farmer", (data, loc) -> new HarvesterJob(data, loc), Profession.FARMER, 64));
+			put("hire_fueler",
+					new JobDescription("Fueler", (data, loc) -> new FuelerJob(data, loc), Profession.TOOLSMITH, 64));
 		}
 	};
 
 	private static HashMap<Profession, String> descriptorMap = null;
 
 	@Nullable
-	private static JobDescription getDescription(Profession profession) {
+	public static JobDescription getDescription(Profession profession) {
+
 		if (descriptorMap == null) {
 			descriptorMap = jobMap.keySet().stream().collect(
 					Collectors.toMap(key -> jobMap.get(key).targetProfession, key -> key, (e1, e2) -> e1, HashMap::new));
