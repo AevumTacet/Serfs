@@ -28,6 +28,7 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 	private List<ItemStack> fuel;
 	private Random random = new Random();
 	private int fuelCount;
+	private int currentTick;
 
 	private static int horizontalDistance;
 	private static int verticalDistance;
@@ -54,13 +55,14 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 	public void onBehaviorTick() {
 		Villager villager = getEntity();
 		Inventory inventory = getInventory();
+		currentTick++;
 
 		if (getTime() > 1000 * 30) {
 			nextJob();
 			return;
 		}
 
-		fuel = getEntity() != null ? Stream.of(getInventory().getContents())
+		fuel = getEntity() != null ? Stream.of(inventory.getContents())
 				.filter(x -> FuelerJob.isFuel(x.getType()))
 				.collect(Collectors.toList())
 				: Collections.emptyList();
@@ -94,6 +96,10 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 
 			if (distance < 1.5) {
 
+				if (currentTick % 10 != 0) {
+					return;
+				}
+
 				ItemStack targetFuel = target.getInventory().getFuel();
 				int index = targetFuel == null ? random.nextInt(fuel.size())
 						: fuel.stream()
@@ -103,7 +109,7 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 								.orElse(-1);
 
 				if (index == -1) {
-					logger.warning("No comaptible fuel was found in the villager inventory.. Going to get more fuel.");
+					logger.warning("No compatible fuel was found in the villager's inventory.. Going to get more fuel.");
 					nextJob();
 					return;
 				}
@@ -127,11 +133,10 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 						}
 
 						villager.getEquipment().setItemInMainHand(new ItemStack(item.getType()));
+						villager.getWorld().playSound(villager.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1, 1);
+						villager.swingMainHand();
+						return;
 					}
-
-					villager.swingMainHand();
-					villager.getWorld().playSound(villager.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1, 1);
-					return;
 				}
 
 				target = null;
