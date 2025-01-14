@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 public class EventsHandler implements Listener {
 	private Logger logger;
 	private SerfManager manager = Main.manager;
-	private static NamespacedKey flag_key = new NamespacedKey(Main.plugin, "trade_flag");;
 
 	public EventsHandler(Logger logger) {
 		this.logger = logger;
+		this.logger.info(("Started Serf event handler.."));
 	}
 
 	@EventHandler
@@ -65,35 +65,7 @@ public class EventsHandler implements Listener {
 			return;
 		}
 
-		if (villager.getProfession() == Villager.Profession.FARMER) {
-
-			for (MerchantRecipe recipe : villager.getRecipes()) {
-				ItemStack result = recipe.getResult();
-				ItemMeta resultMeta = result.getItemMeta();
-				if (resultMeta != null) {
-					String flag = resultMeta.getPersistentDataContainer().get(flag_key, PersistentDataType.STRING);
-					if ("hire_farmer".equals(flag)) {
-						return;
-					}
-				}
-			}
-
-			// Create a custom trade
-			ItemStack itemToSell = new ItemStack(Material.BOOK, 1);
-			ItemMeta meta = itemToSell.getItemMeta();
-			meta.getPersistentDataContainer().set(flag_key, PersistentDataType.STRING, "hire_farmer");
-			meta.displayName(Component.text("Hire Farmer"));
-			itemToSell.setItemMeta(meta);
-
-			ItemStack itemToBuy = new ItemStack(Material.EMERALD, 64);
-			MerchantRecipe customTrade = new MerchantRecipe(itemToSell, 0, 1, true);
-			customTrade.addIngredient(itemToBuy);
-
-			// Add the custom trade to the villager
-			List<MerchantRecipe> trades = new ArrayList<>(villager.getRecipes());
-			trades.add(customTrade);
-			villager.setRecipes(trades);
-		}
+		HireUtils.generateTrade(villager, player);
 	}
 
 	@EventHandler
@@ -103,35 +75,24 @@ public class EventsHandler implements Listener {
 		if (!(event.getInventory().getHolder() instanceof Villager)) {
 			return;
 		}
-
 		Villager villager = (Villager) event.getInventory().getHolder();
 
-		if (villager.getProfession() == Villager.Profession.FARMER
-				&& event.getAction() == InventoryAction.PICKUP_ALL) {
-
+		if (event.getAction() == InventoryAction.PICKUP_ALL) {
 			ItemStack item = event.getCurrentItem();
-			if (item == null) {
+			if (item == null || item.getItemMeta() == null) {
 				return;
 			}
 
-			ItemMeta meta = item.getItemMeta();
-			if (meta == null) {
-				return;
-			}
-
-			String flag = meta.getPersistentDataContainer().get(flag_key, PersistentDataType.STRING);
+			String flag = item.getItemMeta().getPersistentDataContainer().get(HireUtils.flagKey,
+					PersistentDataType.STRING);
 			if (flag == null) {
 				return;
 			}
 
-			if (flag.equals("hire_farmer")) {
-				Player playerEntity = (Player) player;
-				Main.manager.registerEntity(villager, playerEntity);
-
+			boolean hired = HireUtils.hire(villager, flag, (Player) player);
+			if (hired) {
 				event.getInventory().close();
-				player.getInventory().remove(new ItemStack(Material.EMERALD, 64));
-
-				player.sendMessage("Hired farmer!");
+				player.sendMessage("Villager hired!");
 			}
 		}
 	}
@@ -162,7 +123,7 @@ public class EventsHandler implements Listener {
 		if (manager.isServant(entity)) {
 			SerfData serf = manager.getServant(entity.getUniqueId());
 			if (serf.getOwner() != null) {
-				serf.getOwner().sendMessage("Your serf has died!");
+				serf.getOwner().sendMessage("Your Villager has died!");
 			}
 
 			manager.unregisterEntity(entity.getUniqueId());
