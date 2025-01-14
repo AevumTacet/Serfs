@@ -17,8 +17,6 @@ import de.tr7zw.nbtapi.NBTCompound;
 import serfs.IO.Serializable;
 import serfs.Jobs.NoJob;
 import serfs.Jobs.Base.Job;
-import serfs.Jobs.Farmer.HarvesterJob;
-import serfs.Jobs.Fueler.FuelerJob;
 import serfs.Jobs.Supplier.SingleLocationJobSupplier;
 
 public class SerfData implements Serializable {
@@ -112,7 +110,6 @@ public class SerfData implements Serializable {
 				Job job = supplier.get(this, jobLocation);
 				setBehavior(job);
 			}
-
 		}
 
 		getEntity().getWorld().playSound(getEntity().getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);

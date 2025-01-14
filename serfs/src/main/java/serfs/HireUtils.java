@@ -14,13 +14,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
-
 import net.kyori.adventure.text.Component;
-import serfs.Jobs.NoJob;
 import serfs.Jobs.Farmer.HarvesterJob;
 import serfs.Jobs.Fueler.FuelerJob;
-import serfs.Jobs.Supplier.JobSupplier;
 
 public final class HireUtils {
 	private HireUtils() {
