@@ -20,6 +20,7 @@ import serfs.Jobs.NoJob;
 public final class CollectorJob extends StorageJob {
 	private int currentTick;
 	private Random random = new Random();
+	public boolean greedy;
 
 	public CollectorJob(SerfData data, Location startLocation, Predicate<ItemStack> itemFilter, String jobID) {
 		super(data, startLocation, itemFilter, jobID);
@@ -67,6 +68,7 @@ public final class CollectorJob extends StorageJob {
 
 		if (distance < 1.5) {
 			villager.getPathfinder().stopPathfinding();
+			villager.lookAt(startLocation);
 
 			if (currentTick % 10 != 0) {
 				return;
@@ -82,19 +84,26 @@ public final class CollectorJob extends StorageJob {
 					.filter(getItemFilter())
 					.collect(Collectors.toList());
 
+			if (chestItems.size() == 0) {
+				canInteract = false;
+				return;
+			}
+
 			ItemStack chestItem = chestItems.get(random.nextInt(chestItems.size()));
 
 			if (chestItem != null) {
 				villager.swingMainHand();
 
-				int count = chestItem.getAmount() > 4 ? chestItem.getAmount() / 4 : 1;
+				logger.info("Collecting " + chestItem + " from chest");
+				villager.getEquipment().setItemInMainHand(chestItem);
+				villager.getWorld().playSound(villager.getLocation(),
+						Sound.ENTITY_ITEM_PICKUP, 1, 1);
+
+				int count = greedy ? chestItem.getAmount()
+						: chestItem.getAmount() > 4 ? chestItem.getAmount() / 4 : 1;
 
 				inventory.addItem(new ItemStack(chestItem.getType(), count));
 				chestItem.setAmount(chestItem.getAmount() - count);
-
-				villager.getEquipment().setItemInMainHand(new ItemStack(chestItem.getType()));
-				villager.getWorld().playSound(villager.getLocation(),
-						Sound.ENTITY_ITEM_PICKUP, 1, 1);
 
 				canInteract = false;
 				nextJob();

@@ -35,6 +35,7 @@ public abstract class StorageJob extends SingleLocationJob implements ISequentia
 
 		this.itemFilter = itemFilter;
 		this.jobID = jobID;
+		this.canInteract = true;
 	}
 
 	public final void setNextJob(Supplier<Job> supplier) {

@@ -77,10 +77,11 @@ public class EventsHandler implements Listener {
 				return;
 			}
 
+			event.getInventory().close();
 			boolean hired = HireUtils.hire(villager, flag, (Player) player);
 			if (hired) {
-				event.getInventory().close();
 				player.sendMessage("Villager hired!");
+				Main.manager.registerEntity(villager, (Player) player);
 			}
 		}
 	}

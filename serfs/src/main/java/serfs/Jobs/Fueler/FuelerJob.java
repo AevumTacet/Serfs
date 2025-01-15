@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
@@ -29,9 +30,10 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 	private Random random = new Random();
 	private int fuelCount;
 	private int currentTick;
+	private Material requiredFuel;
 
-	private static int horizontalDistance;
-	private static int verticalDistance;
+	private static int horizontalDistance = 16;
+	private static int verticalDistance = 4;
 
 	public FuelerJob(SerfData data, Location startLocation) {
 		super(data, startLocation);
@@ -43,6 +45,11 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 
 	protected static boolean isFuel(Material material) {
 		return material == Material.COAL || material == Material.CHARCOAL;
+	}
+
+	private static int getFuelAmount(Furnace furnace) {
+		return furnace == null || furnace.getInventory().getFuel() == null ? 0
+				: furnace.getInventory().getFuel().getAmount();
 	}
 
 	@Override
@@ -57,29 +64,34 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 		Inventory inventory = getInventory();
 		currentTick++;
 
-		if (getTime() > 1000 * 30) {
+		if (getTime() > 1000 * 60) {
 			nextJob();
 			return;
 		}
 
 		fuel = getEntity() != null ? Stream.of(inventory.getContents())
+				.filter(x -> x != null)
 				.filter(x -> FuelerJob.isFuel(x.getType()))
 				.collect(Collectors.toList())
 				: Collections.emptyList();
 
 		fuelCount = fuel.size();
+		requiredFuel = null;
+
 		if (fuelCount == 0) {
+			logger.warning("Skipping Job sinnce there is no fuel left");
 			nextJob();
 			return;
 		}
 
 		if (target == null) {
 			target = (Furnace) nearbyBlocks.stream()
+					.filter(block -> block != null && canConsumeFuel(block.getType()))
 					.filter(block -> {
 						if (block.getState() instanceof Furnace) {
 							Furnace furnace = (Furnace) block.getState();
 							ItemStack item = furnace.getInventory().getFuel();
-							return item == null || item.getAmount() < 64 - (fuelCount / nearbyBlocks.size());
+							return item == null || item.getAmount() < 64 / nearbyBlocks.size();
 						}
 						return false;
 					})
@@ -88,6 +100,7 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 					.orElse(null);
 
 			if (target == null) {
+				logger.warning("Skipping job since no valid blocks were found");
 				nextJob();
 				return;
 			}
@@ -95,6 +108,9 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 			double distance = villager.getLocation().distance(target.getLocation());
 
 			if (distance < 1.5) {
+
+				villager.getPathfinder().stopPathfinding();
+				villager.lookAt(target.getLocation());
 
 				if (currentTick % 10 != 0) {
 					return;
@@ -110,7 +126,14 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 
 				if (index == -1) {
 					logger.warning("No compatible fuel was found in the villager's inventory.. Going to get more fuel.");
+					requiredFuel = targetFuel != null ? targetFuel.getType() : null;
+					fuelCount = 0;
 					nextJob();
+					return;
+				}
+
+				if (getFuelAmount(target) >= 64 / nearbyBlocks.size() + 1) {
+					target = null;
 					return;
 				}
 
@@ -132,8 +155,9 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 							inventory.addItem(item);
 						}
 
-						villager.getEquipment().setItemInMainHand(new ItemStack(item.getType()));
+						villager.getEquipment().setItemInMainHand(item);
 						villager.getWorld().playSound(villager.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1, 1);
+						villager.getWorld().spawnParticle(Particle.SMOKE, target.getLocation(), 10, 0.25, 0.25, 0.25, 0.05);
 						villager.swingMainHand();
 						return;
 					}
@@ -155,7 +179,9 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 	public void nextJob() {
 		StorageJob nextJob;
 		if (fuelCount == 0) {
-			nextJob = new CollectorJob(data, startLocation, x -> FuelerJob.isFuel(x.getType()), getJobID());
+			nextJob = new CollectorJob(data, startLocation,
+					x -> requiredFuel != null ? x.getType() == requiredFuel : FuelerJob.isFuel(x.getType()), getJobID());
+			((CollectorJob) nextJob).greedy = true;
 		} else {
 			nextJob = new StockerJob(data, startLocation, x -> FuelerJob.isFuel(x.getType()), getJobID());
 		}

@@ -11,6 +11,7 @@ import serfs.SerfData;
 import serfs.Jobs.NoJob;
 import serfs.Jobs.Base.Job;
 import serfs.Jobs.Farmer.HarvesterJob;
+import serfs.Jobs.Fueler.FuelerJob;
 import serfs.Main;
 
 public interface Deserializer {
@@ -59,8 +60,13 @@ public interface Deserializer {
             case "FARMER":
                 yield new HarvesterJob(data, startLocation);
 
+            case "FUELER":
+                yield new FuelerJob(data, startLocation);
+
             case "FOLLOW":
-                yield new NoJob(data);
+                var job = new NoJob(data);
+                job.canFollow = true;
+                yield job;
 
             default:
                 Main.plugin.getLogger().warning("Job state is unspecified, defaulting to follow");

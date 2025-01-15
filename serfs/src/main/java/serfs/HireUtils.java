@@ -98,7 +98,7 @@ public final class HireUtils {
 		}
 
 		if (flag.equals(hireKey)) {
-			Main.manager.registerEntity(villager, player);
+
 			player.getInventory().remove(new ItemStack(Material.EMERALD, description.hireCost));
 
 			Main.plugin.getLogger()
