@@ -96,6 +96,7 @@ public class EventsHandler implements Listener {
 		Player player = event.getPlayer();
 
 		var selected = manager.getServants(player).filter(serf -> serf.isSelected()).collect(Collectors.toList());
+
 		selected.forEach(serf -> {
 			serf.assignJob(block.getLocation());
 			serf.setSelected(false);

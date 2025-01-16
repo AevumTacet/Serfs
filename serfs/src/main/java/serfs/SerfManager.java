@@ -133,6 +133,7 @@ public class SerfManager {
 
 							if (!currentJob.jobStarted) {
 								currentJob.onBehaviorStart();
+								currentJob.jobStarted = true;
 							}
 
 							if (Utils.isDay() || currentJob instanceof NoJob) {

@@ -79,7 +79,7 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 		requiredFuel = null;
 
 		if (fuelCount == 0) {
-			logger.warning("Skipping Job sinnce there is no fuel left");
+			logger.warning("[Fueler] Skipping Job sinnce there is no fuel left");
 			nextJob();
 			return;
 		}
@@ -100,7 +100,7 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 					.orElse(null);
 
 			if (target == null) {
-				logger.warning("Skipping job since no valid blocks were found");
+				logger.warning("[Fueler] Skipping job since no valid blocks were found");
 				nextJob();
 				return;
 			}
@@ -125,7 +125,8 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 								.orElse(-1);
 
 				if (index == -1) {
-					logger.warning("No compatible fuel was found in the villager's inventory.. Going to get more fuel.");
+					logger.warning(
+							"[Fueler] No compatible fuel was found in the villager's inventory.");
 					requiredFuel = targetFuel != null ? targetFuel.getType() : null;
 					fuelCount = 0;
 					nextJob();
@@ -171,7 +172,7 @@ public final class FuelerJob extends SingleLocationJob implements ISequentialJob
 	}
 
 	@Override
-	protected String getJobID() {
+	public String getJobID() {
 		return "FUELER";
 	}
 

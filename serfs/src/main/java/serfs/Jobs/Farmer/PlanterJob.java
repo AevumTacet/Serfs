@@ -106,7 +106,7 @@ public class PlanterJob extends FarmerJob {
 			cropNumber = 0;
 		}
 
-		var nextJob = new StockerJob(data, startLocation, x -> FarmerJob.isSeed(x.getType()), getJobID());
+		var nextJob = new StockerJob(data, startLocation, x -> FarmerJob.isCrop(x.getType()), getJobID());
 		nextJob.setNextJob(() -> new HarvesterJob(data, startLocation));
 		nextJob.setCanInteract(cropNumber > 0);
 		data.setBehavior(nextJob);

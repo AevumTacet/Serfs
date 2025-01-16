@@ -14,7 +14,7 @@ public class NoJob extends Job {
 	}
 
 	@Override
-	protected String getJobID() {
+	public String getJobID() {
 		return "FOLLOW";
 	}
 

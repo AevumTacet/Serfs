@@ -95,24 +95,27 @@ public class SerfData implements Serializable {
 
 	public void assignJob(Location jobLocation) {
 		Block block = jobLocation.getBlock();
-		if (behavior != null && behavior instanceof NoJob) {
-			Profession profession = getProfession();
+		Profession profession = getProfession();
 
-			JobDescription description = HireUtils.getDescription(profession);
-			if (description == null) {
-				return;
-			}
-
-			getVillager().getInventory().clear();
-
-			if (block.getType() == Material.CHEST) {
-				var supplier = (SingleLocationJobSupplier) description.jobSupplier;
-				Job job = supplier.get(this, jobLocation);
-				setBehavior(job);
-			}
+		JobDescription description = HireUtils.getDescription(profession);
+		if (description == null) {
+			Main.plugin.getLogger()
+					.severe("Job could not be assigned since " + profession + " is not a valid profession.");
+			return;
 		}
 
-		getEntity().getWorld().playSound(getEntity().getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
+		getVillager().getInventory().clear();
+
+		if (block.getType() == Material.CHEST) {
+			var supplier = (SingleLocationJobSupplier) description.jobSupplier;
+			Job job = supplier.get(this, jobLocation);
+			setBehavior(job);
+
+			Main.plugin.getLogger().info("Villager job assigned to: " + job.getJobID());
+			getEntity().getWorld().playSound(getEntity().getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
+			return;
+		}
+
 	}
 
 	@Override

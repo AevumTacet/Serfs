@@ -25,7 +25,7 @@ public abstract class FarmerJob extends SingleLocationJob implements ISequential
 	}
 
 	@Override
-	protected final String getJobID() {
+	public final String getJobID() {
 		return "FARMER";
 	}
 

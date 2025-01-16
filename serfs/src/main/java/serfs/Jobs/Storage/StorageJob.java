@@ -71,7 +71,7 @@ public abstract class StorageJob extends SingleLocationJob implements ISequentia
 	}
 
 	@Override
-	protected final String getJobID() {
+	public final String getJobID() {
 		return jobID;
 	}
 

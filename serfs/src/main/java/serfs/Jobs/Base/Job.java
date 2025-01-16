@@ -46,7 +46,7 @@ public abstract class Job implements Serializable {
 
 	public abstract void onBehaviorTick();
 
-	protected abstract String getJobID();
+	public abstract String getJobID();
 
 	public void onBehaviorInteract() {
 	};
